@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 uv sync          # install / update dependencies
 uv run otb       # run the CLI
 uv run pytest    # run tests
+uv run mypy src/ # type-check
 ```
 
 ## Architecture
