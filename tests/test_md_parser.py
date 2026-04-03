@@ -1,17 +1,18 @@
-"""Tests for the notebook HTML parser."""
+"""Tests for the highlight markdown parser."""
 # pylint: disable=missing-function-docstring
 from pathlib import Path
 
 import pytest
 
-from otb.parser import Book, Highlight, parse_notebook
+from otb.parser import Book, Highlight
+from otb.md_parser import parse_highlight_md, parse_highlight_dir
 
-FIXTURE = Path(__file__).parent / "fixtures" / "A Brief History of Time - Notebook.html"
+FIXTURES_DIR = Path(__file__).parent / "fixtures" / "highlights"
 
 
 @pytest.fixture
 def highlights() -> list[Highlight]:
-    return parse_notebook(FIXTURE)
+    return parse_highlight_dir(FIXTURES_DIR)
 
 
 def test_count(highlights: list[Highlight]) -> None:
@@ -25,9 +26,7 @@ def test_book_metadata(highlights: list[Highlight]) -> None:
 
 def test_chapter_assignment(highlights: list[Highlight]) -> None:
     assert highlights[0].chapter == "1   Our Picture of the Universe"
-    assert highlights[1].chapter == "1   Our Picture of the Universe"
     assert highlights[2].chapter == "2   Space and Time"
-    assert highlights[3].chapter == "2   Space and Time"
 
 
 def test_page_and_location(highlights: list[Highlight]) -> None:
@@ -37,10 +36,9 @@ def test_page_and_location(highlights: list[Highlight]) -> None:
     assert highlights[2].location == 310
 
 
-def test_highlight_colors(highlights: list[Highlight]) -> None:
-    assert highlights[0].color == "yellow"
-    assert highlights[1].color == "blue"
-    assert highlights[3].color == "pink"
+def test_no_color(highlights: list[Highlight]) -> None:
+    for h in highlights:
+        assert h.color is None
 
 
 def test_text(highlights: list[Highlight]) -> None:
@@ -49,5 +47,12 @@ def test_text(highlights: list[Highlight]) -> None:
 
 
 def test_title(highlights: list[Highlight]) -> None:
-    assert highlights[0].title == "A Well-Known Scientist Once Gave A Public"
-    assert highlights[2].title == "The Theory Of Relativity Put An End"
+    assert highlights[0].title == "A Well-Known Scientist Once Gave a Public Lecture on Astronomy"
+
+
+def test_single_file() -> None:
+    path = FIXTURES_DIR / "001 - A Well-Known Scientist Once Gave a Public Lecture on Astronomy.md"
+    h = parse_highlight_md(path)
+    assert h.page == 1
+    assert h.location == 42
+    assert h.book.author == "Stephen Hawking"

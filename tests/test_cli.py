@@ -1,4 +1,5 @@
 """Tests for the CLI entrypoint."""
+# pylint: disable=missing-function-docstring
 from click.testing import CliRunner
 
 from otb.cli import main

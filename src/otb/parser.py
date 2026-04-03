@@ -20,16 +20,45 @@ class Highlight:
 
     book: Book
     chapter: str
-    color: str
     page: int
     location: int
     text: str
+    title: str = ""
+    color: str | None = None
+
+
+_SENTENCE_END_RE = re.compile(r"[.!?]")
+_TITLE_MAX_WORDS = 7
+
+
+def _title_from_text(text: str) -> str:
+    """Return a title from the first sentence of text, capped at _TITLE_MAX_WORDS words."""
+    m = _SENTENCE_END_RE.search(text)
+    sentence = text[: m.start()] if m else text
+    words = sentence.split()[:_TITLE_MAX_WORDS]
+    return " ".join(words).title()
 
 
 _NOTE_HEADING_RE = re.compile(
     r"Highlight\(\s*(\w+)\s*\)\s*-\s*Page\s+(\d+)\s*·\s*Location\s+(\d+)",
     re.IGNORECASE,
 )
+
+
+def _parse_highlight(
+    book: Book, chapter: str, pending: dict[str, str | int], text_div: Tag
+) -> Highlight:
+    """Build a Highlight from a parsed noteHeading and its noteText div."""
+    text = text_div.get_text(strip=True)
+    return Highlight(
+        book=book,
+        chapter=chapter,
+        page=int(pending["page"]),
+        location=int(pending["location"]),
+        text=text,
+        title=_title_from_text(text),
+        color=str(pending["color"]),
+    )
 
 
 def _require(tag: Tag | None, desc: str) -> Tag:
@@ -78,16 +107,7 @@ def parse_notebook(path: Path) -> list[Highlight]:
             continue
 
         if "noteText" in classes and pending is not None:
-            highlights.append(
-                Highlight(
-                    book=book,
-                    chapter=current_chapter,
-                    color=str(pending["color"]),
-                    page=int(pending["page"]),
-                    location=int(pending["location"]),
-                    text=div.get_text(strip=True),
-                )
-            )
+            highlights.append(_parse_highlight(book, current_chapter, pending, div))
             pending = None
 
     return highlights
