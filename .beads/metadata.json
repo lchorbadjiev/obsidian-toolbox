@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "obsidian_toolbox",
+  "project_id": "2e254ecf-ff42-4f0f-a1c8-bf3a565644c0"
+}
