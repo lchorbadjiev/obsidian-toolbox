@@ -44,6 +44,7 @@ def parse_highlight_md(path: Path) -> Highlight:
         location=int(fm["location"]),
         text=blockquote.group(1),
         title=h1.group(1),
+        number=int(fm["number"]) if "number" in fm else 0,
     )
 
 

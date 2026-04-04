@@ -25,6 +25,7 @@ class Highlight:
     text: str
     title: str = ""
     color: str | None = None
+    number: int = 0
 
 
 _SENTENCE_END_RE = re.compile(r"[.!?]")
@@ -109,5 +110,8 @@ def parse_notebook(path: Path) -> list[Highlight]:
         if "noteText" in classes and pending is not None:
             highlights.append(_parse_highlight(book, current_chapter, pending, div))
             pending = None
+
+    for i, h in enumerate(highlights, start=1):
+        h.number = i
 
     return highlights

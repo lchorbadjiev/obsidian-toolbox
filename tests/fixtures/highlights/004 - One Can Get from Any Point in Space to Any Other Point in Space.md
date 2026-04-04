@@ -5,6 +5,7 @@ chapter: "2   Space and Time"
 page: 25
 location: 357
 type: highlight
+number: 4
 ---
 
 # One Can Get from Any Point in Space to Any Other Point in Space

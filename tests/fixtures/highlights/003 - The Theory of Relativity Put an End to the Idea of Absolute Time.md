@@ -5,6 +5,7 @@ chapter: "2   Space and Time"
 page: 22
 location: 310
 type: highlight
+number: 3
 ---
 
 # The Theory of Relativity Put an End to the Idea of Absolute Time

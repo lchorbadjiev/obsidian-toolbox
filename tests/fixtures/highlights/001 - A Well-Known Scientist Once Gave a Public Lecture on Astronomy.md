@@ -5,6 +5,7 @@ chapter: "1   Our Picture of the Universe"
 page: 1
 location: 42
 type: highlight
+number: 1
 ---
 
 # A Well-Known Scientist Once Gave a Public Lecture on Astronomy

@@ -5,6 +5,7 @@ chapter: "1   Our Picture of the Universe"
 page: 3
 location: 87
 type: highlight
+number: 2
 ---
 
 # Any Physical Theory Is Always Provisional

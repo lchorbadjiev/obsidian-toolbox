@@ -50,6 +50,10 @@ def test_title(highlights: list[Highlight]) -> None:
     assert highlights[0].title == "A Well-Known Scientist Once Gave a Public Lecture on Astronomy"
 
 
+def test_numbers(highlights: list[Highlight]) -> None:
+    assert [h.number for h in highlights] == [1, 2, 3, 4]
+
+
 def test_single_file() -> None:
     path = FIXTURES_DIR / "001 - A Well-Known Scientist Once Gave a Public Lecture on Astronomy.md"
     h = parse_highlight_md(path)

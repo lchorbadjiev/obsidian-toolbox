@@ -51,3 +51,7 @@ def test_text(highlights: list[Highlight]) -> None:
 def test_title(highlights: list[Highlight]) -> None:
     assert highlights[0].title == "A Well-Known Scientist Once Gave A Public"
     assert highlights[2].title == "The Theory Of Relativity Put An End"
+
+
+def test_numbers(highlights: list[Highlight]) -> None:
+    assert [h.number for h in highlights] == [1, 2, 3, 4]
