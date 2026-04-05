@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from otb.md_parser import parse_highlight_dir
-from otb.mcp_server import run as mcp_run
+from otb.mcp_server import _build_index_prompt, run as mcp_run
 from otb.parser import parse_notebook
 
 
@@ -35,6 +35,13 @@ def md() -> None:
 def md_count(path: Path) -> None:
     """Print the number of highlights in a directory of markdown highlight files."""
     click.echo(len(parse_highlight_dir(path)))
+
+
+@md.command("index-prompt")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, path_type=Path))
+def md_index_prompt(path: Path) -> None:
+    """Print the book index generation prompt for a highlights directory."""
+    click.echo(_build_index_prompt(str(path)))
 
 
 @kindle.command("count")

@@ -1,14 +1,17 @@
 """MCP server for obsidian-toolbox.
 
-Exposes three tools:
-- parse_kindle_export: parse a Kindle HTML notebook export into raw highlights
+Exposes three tools and one prompt:
+- parse_kindle_export: parse a Kindle HTML notebook export
 - parse_md_highlights_dir: read a directory of markdown highlight files
 - save_highlights: write highlights as individual markdown files
+- generate_book_index: prompt to generate a book index markdown file
 """
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.prompts.base import UserMessage
 
 from otb.md_parser import parse_highlight_md
 from otb.md_writer import write_highlights
@@ -116,6 +119,107 @@ def save_highlights(highlights: list[dict[str, Any]], directory: str) -> list[st
     objects = [_dict_to_highlight(d) for d in highlights]
     paths = write_highlights(objects, target)
     return [str(p) for p in paths]
+
+
+def _build_index_prompt(  # pylint: disable=too-many-locals  # prompt builder collects book/chapter/highlight state in a single pass
+    directory: str,
+) -> str:
+    """Build the book index generation prompt text from a highlights dir."""
+    resolved = Path(directory)
+    if not resolved.exists():
+        return f"Error: directory not found: {directory}"
+    if not resolved.is_dir():
+        return f"Error: path is not a directory: {directory}"
+
+    highlights: list[Highlight] = []
+    skipped: list[str] = []
+    for md_file in sorted(resolved.glob("*.md")):
+        try:
+            highlights.append(parse_highlight_md(md_file))
+        except Exception as exc:  # pylint: disable=broad-exception-caught  # per-file tolerance
+            skipped.append(f"{md_file.name}: {exc}")
+
+    if not highlights:
+        msg = "No valid highlight files found in the directory."
+        if skipped:
+            msg += " Skipped files:\n" + "\n".join(f"  - {s}" for s in skipped)
+        return msg
+
+    first = highlights[0]
+    book_title = first.book.title
+    author = first.book.author
+
+    # Group by chapter (preserve filename-sorted order within each group)
+    chapters: dict[str, list[Highlight]] = defaultdict(list)
+    for h in highlights:
+        chapters[h.chapter].append(h)
+
+    lines: list[str] = [
+        f'You have {len(highlights)} highlights from "{book_title}" by {author}.',
+        "",
+        "Generate a book index markdown file in this exact format:",
+        "",
+        "```markdown",
+        "---",
+        "tags: [book]",
+        f"author: {author}",
+        "published: <year if known, otherwise leave blank>",
+        "---",
+        "",
+        f"# {book_title}",
+        "",
+        "<2–4 paragraph prose summary of the book's main argument,",
+        " themes, and significance, written in your own words>",
+        "",
+        "---",
+        "",
+        "## Notes by Chapter",
+        "",
+        "<one ### subsection per chapter, each containing wikilinks>",
+        "```",
+        "",
+        "Use this wikilink format for each note:",
+        "  [[notes/NNN - Title of Note]]",
+        "where NNN is the zero-padded highlight number (e.g. 001).",
+        "",
+        "---",
+        "",
+        "## Highlights by Chapter",
+        "",
+    ]
+
+    for chapter, chapter_highlights in chapters.items():
+        lines.append(f"### {chapter}")
+        lines.append("")
+        for h in chapter_highlights:
+            num = f"{h.number:03d}"
+            lines.append(f"**{num} — {h.title}**")
+            lines.append(f"Wikilink: [[notes/{num} - {h.title}]]")
+            lines.append(f"> {h.text}")
+            lines.append("")
+
+    if skipped:
+        lines.append("---")
+        lines.append("")
+        lines.append("The following files were skipped due to parse errors:")
+        for s in skipped:
+            lines.append(f"  - {s}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+@mcp.prompt(
+    description=(
+        "Generate a book index markdown file from a directory of highlight "
+        "markdown files. Returns a prompt containing all highlight data grouped "
+        "by chapter with wikilinks and instructions to produce frontmatter, a "
+        "prose summary, and a Notes by Chapter section."
+    )
+)
+def generate_book_index(directory: str) -> list[UserMessage]:
+    """Return a prompt for generating a book index from a highlights dir."""
+    return [UserMessage(content=_build_index_prompt(directory))]
 
 
 def run() -> None:
