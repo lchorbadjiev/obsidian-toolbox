@@ -54,3 +54,10 @@ Run `bd prime` for workflow context, or install hooks (`bd hooks install`) for a
 
 For full workflow details: `bd prime`
 --- END AGENTS.MD CONTENT ---
+
+## Active Technologies
+- Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps (002-parse-md-highlights)
+- N/A (read-only; no files written) (002-parse-md-highlights)
+
+## Recent Changes
+- 002-parse-md-highlights: Added Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps

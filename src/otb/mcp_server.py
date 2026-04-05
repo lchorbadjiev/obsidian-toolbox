@@ -1,7 +1,8 @@
 """MCP server for obsidian-toolbox.
 
-Exposes two tools:
+Exposes three tools:
 - parse_kindle_export: parse a Kindle HTML notebook export into raw highlights
+- parse_md_highlights_dir: read a directory of markdown highlight files
 - save_highlights: write highlights as individual markdown files
 """
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from otb.md_parser import parse_highlight_md
 from otb.md_writer import write_highlights
 from otb.parser import Book, Highlight, parse_notebook
 
@@ -66,6 +68,37 @@ def parse_kindle_export(path: str) -> list[dict[str, Any]]:
         raise FileNotFoundError(f"File not found: {path}")
     highlights = parse_notebook(resolved, generate_title=False)
     return [_highlight_to_dict(h) for h in highlights]
+
+
+@mcp.tool(
+    description=(
+        "Read all highlight markdown files in a directory and return them as a list. "
+        "Files are returned in filename-sorted order. "
+        "Returns {highlights: [...], parse_errors: {filename: error_message}}. "
+        "parse_errors is empty when all files parse successfully; malformed files are "
+        "skipped and reported there without aborting the call. "
+        "Raises FileNotFoundError if the path does not exist, "
+        "NotADirectoryError if the path is a file."
+    )
+)
+def parse_md_highlights_dir(
+    directory: str,
+) -> dict[str, Any]:
+    """Return highlights from all .md files in directory; report per-file errors."""
+    resolved = Path(directory)
+    if not resolved.exists():
+        raise FileNotFoundError(f"Directory not found: {directory}")
+    if not resolved.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {directory}")
+    highlights: list[dict[str, Any]] = []
+    parse_errors: dict[str, str] = {}
+    for md_file in sorted(resolved.glob("*.md")):
+        try:
+            h = parse_highlight_md(md_file)
+            highlights.append(_highlight_to_dict(h))
+        except Exception as exc:  # pylint: disable=broad-exception-caught  # per-file tolerance: report and continue
+            parse_errors[md_file.name] = str(exc)
+    return {"highlights": highlights, "parse_errors": parse_errors}
 
 
 @mcp.tool(
