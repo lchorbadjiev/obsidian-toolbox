@@ -1,7 +1,7 @@
 # Obsidian Toolbox
 
 A CLI tool and MCP server for converting Kindle notebook exports into
-Obsidian-ready markdown highlight files and book index documents.
+Obsidian-ready markdown annotation files and book index documents.
 
 ## Installation
 
@@ -38,30 +38,30 @@ the agent:
 
 | Name | Type | Description |
 |------|------|-------------|
-| `parse_kindle_export` | tool | Parse a Kindle HTML export into highlights |
-| `save_highlights` | tool | Save highlights as individual `.md` files |
-| `parse_md_highlights_dir` | tool | Read a directory of highlight `.md` files |
-| `generate_book_index` | prompt | Generate a book index from a highlights dir |
+| `parse_kindle_export` | tool | Parse a Kindle HTML export into annotations |
+| `save_highlights` | tool | Save annotations as individual `.md` files |
+| `parse_md_highlights_dir` | tool | Read a directory of annotation `.md` files |
+| `generate_book_index` | prompt | Generate a book index from an annotations dir |
 
-## Workflow: Kindle Export → Markdown Highlights → Book Index
+## Workflow: Kindle Export → Markdown Annotations → Book Index
 
 ### Step 1 — Export from Kindle
 
-In the Kindle app, open your annotations for a book and export it as an
-HTML file (e.g. `A Brief History of Time - Notebook.html`).
+In the Kindle app, open your annotations for a book and export them as
+an HTML file (e.g. `A Brief History of Time - Notebook.html`).
 
-### Step 2 — Parse and save highlights
+### Step 2 — Parse and save annotations
 
 Ask Claude (with the MCP server active):
 
 > Parse the Kindle export at `~/Downloads/A Brief History of Time - Notebook.html`,
-> generate a short title for each highlight, then save them to
+> generate a short title for each annotation, then save them to
 > `~/notes/a-brief-history/notes/`.
 
 Claude will:
 1. Call `parse_kindle_export` to read the HTML file.
-2. Generate a concise title (under 10 words) for each highlight.
-3. Call `save_highlights` to write one `.md` file per highlight.
+2. Generate a concise title (under 10 words) for each annotation.
+3. Call `save_highlights` to write one `.md` file per annotation.
 
 Each output file follows this format:
 
@@ -83,7 +83,7 @@ number: 1
 **Citation:** Hawking, Stephen. *A Brief History of Time*. ...
 ```
 
-Files are named `001 - Title of Highlight.md`, `002 - ...`, etc.
+Files are named `001 - Title of Annotation.md`, `002 - ...`, etc.
 
 ### Step 3 — Generate the book index
 
@@ -94,7 +94,7 @@ Ask Claude:
 > as `~/notes/a-brief-history/A Brief History of Time - Index.md`.
 
 Claude will:
-1. Call the `generate_book_index` prompt, which reads all highlight
+1. Call the `generate_book_index` prompt, which reads all annotation
    files and returns structured context.
 2. Write a prose summary of the book.
 3. Save the index file.
@@ -123,16 +123,16 @@ and the universe for a general audience...
 ...
 ```
 
-All wikilinks point to the individual highlight files, making the
+All wikilinks point to the individual annotation files, making the
 index fully navigable in Obsidian.
 
 ## CLI Reference
 
 ```bash
-# Count highlights in a Kindle export
+# Count annotations in a Kindle export
 otb kindle count path/to/export.html
 
-# Count highlights in a directory of .md files
+# Count annotations in a directory of .md files
 otb md count path/to/notes/
 
 # Print the book index generation prompt (inspect or pipe)
