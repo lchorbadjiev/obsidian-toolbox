@@ -55,3 +55,8 @@ def test_title(highlights: list[Highlight]) -> None:
 
 def test_numbers(highlights: list[Highlight]) -> None:
     assert [h.number for h in highlights] == [1, 2, 3, 4]
+
+
+def test_generate_title_false() -> None:
+    results = parse_notebook(FIXTURE, generate_title=False)
+    assert all(h.title == "" for h in results)

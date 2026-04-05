@@ -15,6 +15,7 @@ class Book:
 
 
 @dataclass
+# pylint: disable=too-many-instance-attributes  # fixed data contract; fields cannot be reduced
 class Highlight:
     """A single Kindle highlight."""
 
@@ -47,7 +48,8 @@ _NOTE_HEADING_RE = re.compile(
 
 
 def _parse_highlight(
-    book: Book, chapter: str, pending: dict[str, str | int], text_div: Tag
+    book: Book, chapter: str, pending: dict[str, str | int], text_div: Tag,
+    generate_title: bool = True,
 ) -> Highlight:
     """Build a Highlight from a parsed noteHeading and its noteText div."""
     text = text_div.get_text(strip=True)
@@ -57,7 +59,7 @@ def _parse_highlight(
         page=int(pending["page"]),
         location=int(pending["location"]),
         text=text,
-        title=_title_from_text(text),
+        title=_title_from_text(text) if generate_title else "",
         color=str(pending["color"]),
     )
 
@@ -69,7 +71,9 @@ def _require(tag: Tag | None, desc: str) -> Tag:
     return tag
 
 
-def parse_notebook(path: Path) -> list[Highlight]:
+def parse_notebook(  # pylint: disable=too-many-locals  # sequential HTML parsing requires tracking several state variables
+    path: Path, generate_title: bool = True
+) -> list[Highlight]:
     """Parse a Kindle notebook HTML export and return all highlights."""
     soup = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser")
 
@@ -108,7 +112,7 @@ def parse_notebook(path: Path) -> list[Highlight]:
             continue
 
         if "noteText" in classes and pending is not None:
-            highlights.append(_parse_highlight(book, current_chapter, pending, div))
+            highlights.append(_parse_highlight(book, current_chapter, pending, div, generate_title))
             pending = None
 
     for i, h in enumerate(highlights, start=1):

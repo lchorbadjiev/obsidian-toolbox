@@ -30,8 +30,6 @@ def parse_highlight_md(path: Path) -> Highlight:
     book = Book(title=fm["source"], author=fm["author"])
 
     h1 = _H1_RE.search(text)
-    if not h1:
-        raise ValueError(f"No H1 title found in {path}")
 
     blockquote = _BLOCKQUOTE_RE.search(text)
     if not blockquote:
@@ -43,7 +41,7 @@ def parse_highlight_md(path: Path) -> Highlight:
         page=int(fm["page"]),
         location=int(fm["location"]),
         text=blockquote.group(1),
-        title=h1.group(1),
+        title=h1.group(1) if h1 else "",
         number=int(fm["number"]) if "number" in fm else 0,
     )
 

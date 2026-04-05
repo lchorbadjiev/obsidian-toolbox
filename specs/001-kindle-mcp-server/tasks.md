@@ -22,7 +22,7 @@ and testing of each story.
 
 **Purpose**: Add new runtime dependency.
 
-- [ ] T001 Add `mcp` to `[project].dependencies` in `pyproject.toml` and run `uv sync`
+- [x] T001 Add `mcp` to `[project].dependencies` in `pyproject.toml` and run `uv sync`
 
 ---
 
@@ -32,9 +32,9 @@ and testing of each story.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T002 Add `generate_title: bool = True` parameter to `_parse_highlight` and `parse_notebook` in `src/otb/parser.py`; when `False`, leave `Highlight.title` as `""`  (existing callers are unaffected — default preserves current behaviour)
-- [ ] T003 [P] Update `parse_highlight_md` in `src/otb/md_parser.py` to make the `# heading` optional — return `title=""` instead of raising `ValueError` when no H1 is found (required for round-trip compliance with title-less files)
-- [ ] T004 [P] Add test to `tests/test_parser.py` verifying `parse_notebook(path, generate_title=False)` returns highlights with `title == ""` using the existing HTML fixture at `tests/fixtures/`
+- [x] T002 Add `generate_title: bool = True` parameter to `_parse_highlight` and `parse_notebook` in `src/otb/parser.py`; when `False`, leave `Highlight.title` as `""`  (existing callers are unaffected — default preserves current behaviour)
+- [x] T003 [P] Update `parse_highlight_md` in `src/otb/md_parser.py` to make the `# heading` optional — return `title=""` instead of raising `ValueError` when no H1 is found (required for round-trip compliance with title-less files)
+- [x] T004 [P] Add test to `tests/test_parser.py` verifying `parse_notebook(path, generate_title=False)` returns highlights with `title == ""` using the existing HTML fixture at `tests/fixtures/`
 
 **Checkpoint**: Foundation ready — both user story phases can now begin.
 
@@ -48,9 +48,9 @@ and testing of each story.
 verify a non-empty list is returned, each item has `book`, `chapter`, `page`,
 `location`, `text`, and `color`, and that `title` is absent or empty on every item.
 
-- [ ] T005 [P] [US1] Write failing tests in `tests/test_mcp_server.py` for the `parse_kindle_export` tool handler function: (a) valid HTML fixture path → list of highlights with empty titles; (b) non-existent path → raises / returns error; (c) empty export → returns empty list
-- [ ] T006 [US1] Create `src/otb/mcp_server.py` with a FastMCP server instance and `parse_kindle_export` tool that delegates to `parse_notebook(path, generate_title=False)`; tool description MUST instruct the host LLM to generate a concise title for each highlight before calling the save tool
-- [ ] T007 [US1] Add `otb mcp` command to `src/otb/cli.py` under the top-level `main` group; the command MUST start the MCP server with stdio transport by calling `mcp_server.run()`
+- [x] T005 [P] [US1] Write failing tests in `tests/test_mcp_server.py` for the `parse_kindle_export` tool handler function: (a) valid HTML fixture path → list of highlights with empty titles; (b) non-existent path → raises / returns error; (c) empty export → returns empty list
+- [x] T006 [US1] Create `src/otb/mcp_server.py` with a FastMCP server instance and `parse_kindle_export` tool that delegates to `parse_notebook(path, generate_title=False)`; tool description MUST instruct the host LLM to generate a concise title for each highlight before calling the save tool
+- [x] T007 [US1] Add `otb mcp` command to `src/otb/cli.py` under the top-level `main` group; the command MUST start the MCP server with stdio transport by calling `mcp_server.run()`
 
 **Checkpoint**: US1 complete — `otb mcp` starts, `parse_kindle_export` tool works end-to-end.
 
@@ -66,10 +66,10 @@ LLM-assigned titles) and a temp directory; verify one `.md` file per highlight e
 frontmatter fields match, and each file can be re-parsed by `parse_highlight_md`
 without error.
 
-- [ ] T008 [P] [US2] Write failing tests in `tests/test_md_writer.py` covering: (a) highlight with title → correct filename `{number:03d} - {sanitized_title}.md` and frontmatter; (b) highlight without title → filename `{number:03d}.md`, no H1 line written; (c) non-existent directory → created automatically; (d) two highlights with identical text → unique filenames via number prefix; (e) round-trip: written file parsed back by `parse_highlight_md` returns equivalent `Highlight`
-- [ ] T009 [P] [US2] Write failing tests in `tests/test_mcp_server.py` for the `save_highlights` tool handler function: (a) valid highlights + writable dir → returns list of created file paths; (b) non-writable dir → returns descriptive error, no partial files
-- [ ] T010 [US2] Create `src/otb/md_writer.py` with: `write_highlight(h: Highlight, directory: Path) -> Path` (writes one file, creates dir if needed) and `write_highlights(highlights: list[Highlight], directory: Path) -> list[Path]` (writes all, aborts on first error); filename format: `f"{h.number:03d} - {sanitize(h.title)}.md"` when title present, `f"{h.number:03d}.md"` otherwise; frontmatter fields: `source`, `author`, `chapter`, `page`, `location`, `type: highlight`, `number`; body: optional `# {title}` then `> {text}`
-- [ ] T011 [US2] Add `save_highlights` tool to `src/otb/mcp_server.py` that accepts a list of highlight dicts and a `directory` string, deserialises into `Highlight` objects, delegates to `write_highlights`, and returns the list of written paths
+- [x] T008 [P] [US2] Write failing tests in `tests/test_md_writer.py` covering: (a) highlight with title → correct filename `{number:03d} - {sanitized_title}.md` and frontmatter; (b) highlight without title → filename `{number:03d}.md`, no H1 line written; (c) non-existent directory → created automatically; (d) two highlights with identical text → unique filenames via number prefix; (e) round-trip: written file parsed back by `parse_highlight_md` returns equivalent `Highlight`
+- [x] T009 [P] [US2] Write failing tests in `tests/test_mcp_server.py` for the `save_highlights` tool handler function: (a) valid highlights + writable dir → returns list of created file paths; (b) non-writable dir → returns descriptive error, no partial files
+- [x] T010 [US2] Create `src/otb/md_writer.py` with: `write_highlight(h: Highlight, directory: Path) -> Path` (writes one file, creates dir if needed) and `write_highlights(highlights: list[Highlight], directory: Path) -> list[Path]` (writes all, aborts on first error); filename format: `f"{h.number:03d} - {sanitize(h.title)}.md"` when title present, `f"{h.number:03d}.md"` otherwise; frontmatter fields: `source`, `author`, `chapter`, `page`, `location`, `type: highlight`, `number`; body: optional `# {title}` then `> {text}`
+- [x] T011 [US2] Add `save_highlights` tool to `src/otb/mcp_server.py` that accepts a list of highlight dicts and a `directory` string, deserialises into `Highlight` objects, delegates to `write_highlights`, and returns the list of written paths
 
 **Checkpoint**: US2 complete — full parse → title → save workflow works end-to-end.
 
@@ -79,9 +79,9 @@ without error.
 
 **Purpose**: Quality gates and final validation.
 
-- [ ] T012 [P] Run `uv run mypy src/ tests/` and fix all type errors in `src/otb/parser.py`, `src/otb/md_parser.py`, `src/otb/md_writer.py`, `src/otb/mcp_server.py`, `src/otb/cli.py`, and new test files
-- [ ] T013 [P] Run `uv run pylint src/ tests/` and fix all issues to reach 10/10; add file-level `missing-function-docstring` disable comment to new test files only; justify any new suppressions with inline comments
-- [ ] T014 Run `uv run pytest` and verify all tests (existing + new) pass with no failures
+- [x] T012 [P] Run `uv run mypy src/ tests/` and fix all type errors in `src/otb/parser.py`, `src/otb/md_parser.py`, `src/otb/md_writer.py`, `src/otb/mcp_server.py`, `src/otb/cli.py`, and new test files
+- [x] T013 [P] Run `uv run pylint src/ tests/` and fix all issues to reach 10/10; add file-level `missing-function-docstring` disable comment to new test files only; justify any new suppressions with inline comments
+- [x] T014 Run `uv run pytest` and verify all tests (existing + new) pass with no failures
 
 ---
 
