@@ -1,0 +1,169 @@
+<!--
+SYNC IMPACT REPORT
+==================
+Version change: 1.1.0 → 1.1.1
+
+Modified principles:
+  V. Simplicity and Minimal Dependencies — removed explicit prohibition on `pyyaml`;
+     frontmatter parsing now permits pyyaml as an approved dependency alongside regex.
+Added sections: N/A
+Removed sections: N/A
+
+Templates checked:
+  ✅ .specify/templates/plan-template.md — No pyyaml-specific references; no update needed.
+  ✅ .specify/templates/spec-template.md — No dependency policy references; no update needed.
+  ✅ .specify/templates/tasks-template.md — No change required.
+  ✅ .specify/templates/constitution-template.md — Source template; no changes needed.
+  ✅ .specify/templates/commands/ — Directory is empty; no command files to update.
+
+Follow-up TODOs: None.
+-->
+
+# Obsidian Toolbox Constitution
+
+## Core Principles
+
+### I. CLI-First
+
+Every feature MUST be exposed as a command under the `otb` Click CLI group defined in
+`src/otb/cli.py`. Features without a CLI entry point are incomplete.
+
+- Commands MUST follow the `otb <group> <subcommand>` pattern using `@click.group()` /
+  `@click.command()`.
+- Output goes to stdout; errors and warnings go to stderr.
+- Commands MUST accept file paths as `click.Path` arguments — no hardcoded paths.
+
+**Rationale**: The CLI is the primary user interface. Every capability must be reachable
+without writing Python.
+
+### II. Shared Parser Contract
+
+All parsers MUST produce `list[Highlight]` using the `Highlight` dataclas
+defined in `src/otb/parser.py`. Parser-specific data models are prohibited.
+
+**Rationale**: A unified output contract allows CLI commands, MCP tools, and future
+exporters to consume highlights from any source interchangeably.
+
+### III. Test-First (NON-NEGOTIABLE)
+
+Tests MUST be written and confirmed to fail before any implementation code is added.
+The Red-Green-Refactor cycle is strictly enforced.
+
+- Test fixtures MUST live in `tests/fixtures/` (HTML files and `tests/fixtures/highlights/`
+  for markdown files).
+- `uv run pytest` MUST pass with no failures before any commit.
+- New parsers MUST have at least one fixture-based integration test.
+- New MCP tools MUST have at least one test verifying tool inputs, outputs, and error
+  responses conform to the MCP schema.
+
+**Rationale**: Fixtures mirror real-world Kindle exports and markdown files. Test-first
+prevents regressions and validates parser and MCP tool contracts against actual data.
+
+### IV. Type Safety and Lint Quality
+
+All code MUST satisfy `uv run mypy src/ tests/` (zero errors) and achieve a 10/10 score
+from `uv run pylint src/ tests/`.
+
+- Suppressing pylint rules is permitted only for established project-wide patterns
+  already documented in `pyproject.toml` (e.g., `redefined-outer-name` for pytest
+  fixtures).
+- File-level suppressions (e.g., `missing-function-docstring`) are permitted in test
+  files only.
+- New suppressions MUST be justified by a comment explaining why the rule cannot be
+  satisfied.
+
+**Rationale**: Static analysis is a first-class quality gate. A 10/10 lint score and
+clean mypy output are observable, machine-verifiable standards.
+
+### V. Simplicity and Minimal Dependencies
+
+Implementations MUST prefer the Python standard library over third-party packages.
+Dependencies are added only when the stdlib cannot reasonably solve the problem.
+
+- Markdown frontmatter MAY be parsed with `pyyaml` or with regex; `pyyaml` is an
+  approved dependency for this specific use case.
+- New dependencies (other than `pyyaml`) require explicit justification in the PR or
+  commit message.
+- YAGNI: no speculative abstractions, no premature configurability, no unused code paths.
+
+**Rationale**: Fewer dependencies mean fewer attack surfaces, faster installs, and
+simpler maintenance. `pyyaml` is explicitly permitted for frontmatter parsing where
+regex becomes unwieldy; all other stdlib-replaceable packages remain prohibited.
+
+### VI. MCP Server (stdio Transport)
+
+The `otb` tool MUST expose its capabilities as an MCP (Model Context Protocol) server
+using the stdio transport, enabling AI agents and MCP-compatible clients to invoke otb
+tools programmatically.
+
+- The MCP server MUST be launchable via `otb mcp` (or a dedicated script entry point)
+  that starts the stdio-based server process.
+- Every user-facing CLI capability MUST also be registered as an MCP tool with an
+  equivalent name, description, and parameter schema.
+- MCP tool handlers MUST delegate to the same underlying parser/service functions used
+  by CLI commands — logic duplication between CLI and MCP layers is prohibited.
+- The stdio transport is the only supported transport. HTTP/SSE transport MUST NOT be
+  added without a MINOR constitution amendment.
+- MCP tool inputs and outputs MUST be typed and validated; untyped `dict` interfaces
+  are prohibited.
+
+**Rationale**: MCP enables AI agents (including Claude) to call otb tools directly
+without shell invocation. stdio is the simplest, most portable transport and aligns
+with Principle V (Simplicity). Sharing implementation with CLI (Principle I) prevents
+drift between the two interfaces.
+
+## Technology Stack
+
+- **Language**: Python 3.12+
+- **Package manager**: uv (`uv sync` to install, `uv run <cmd>` to execute)
+- **CLI framework**: Click (registered as `otb` script in `pyproject.toml`)
+- **MCP framework**: MCP Python SDK (`mcp`) — stdio transport only
+- **Testing**: pytest with fixture files in `tests/fixtures/`
+- **Type-checking**: mypy (strict, zero-error target)
+- **Linting**: pylint (10/10 target)
+- **Project layout**: `src` layout — package root at `src/otb/`
+
+Adding or removing a technology from this stack constitutes a MINOR amendment if additive
+or a MAJOR amendment if a listed tool is removed or replaced.
+
+## Development Workflow
+
+- **Before committing**: `uv run pytest` AND `uv run mypy src/ tests/` AND
+  `uv run pylint src/ tests/` MUST all pass cleanly.
+- **New parser**: add fixture → write failing test → implement → verify green.
+- **New CLI command**: add Click command → wire to parser or service function → add
+  integration test covering the command output.
+- **New MCP tool**: register tool in MCP server → write failing test verifying schema
+  and response → delegate to existing service function → verify green.
+- **Issue tracking**: use `bd` (beads). Run `bd prime` for workflow context.
+  - `bd ready` — find unblocked work
+  - `bd create "Title" --type task --priority 2` — create issue
+  - `bd close <id>` — complete work
+
+All PRs and agent-assisted implementations MUST verify compliance with Core Principles
+before merging.
+
+## Governance
+
+This constitution supersedes all other development guidelines. In case of conflict,
+the constitution takes precedence.
+
+**Amendment procedure**:
+1. Identify which version bump applies (MAJOR / MINOR / PATCH per semantic versioning).
+2. Update this file: revise the relevant section, increment `CONSTITUTION_VERSION`,
+   set `LAST_AMENDED_DATE` to today's date.
+3. Run the consistency propagation checklist against all `.specify/templates/` files.
+4. Commit with message: `docs: amend constitution to vX.Y.Z (<summary of change>)`.
+
+**Versioning policy**:
+- MAJOR: principle removal, redefinition, or backward-incompatible governance change.
+- MINOR: new principle or section added, or materially expanded guidance.
+- PATCH: clarifications, wording, typo fixes, non-semantic refinements.
+
+**Compliance review**: Every implementation plan MUST include a Constitution Check
+section (see `.specify/templates/plan-template.md`). Violations MUST be justified in
+the Complexity Tracking table.
+
+Use `CLAUDE.md` for runtime development guidance (commands, architecture, file layout).
+
+**Version**: 1.1.1 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-05
