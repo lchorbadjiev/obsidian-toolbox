@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 
+from otb.mcp_server import run as mcp_run
 from otb.parser import parse_notebook
 
 
@@ -15,6 +16,12 @@ def main() -> None:
 @main.group()
 def kindle() -> None:
     """Commands for Kindle notebook exports."""
+
+
+@main.command("mcp")
+def mcp_serve() -> None:
+    """Start the MCP server using stdio transport."""
+    mcp_run()
 
 
 @kindle.command("count")
