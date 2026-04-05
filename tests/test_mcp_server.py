@@ -8,7 +8,12 @@ import sys
 
 import pytest
 
-from otb.mcp_server import parse_kindle_export, parse_md_highlights_dir, save_highlights
+from otb.mcp_server import (
+    generate_book_index,
+    parse_kindle_export,
+    parse_md_highlights_dir,
+    save_highlights,
+)
 
 FIXTURE = Path(__file__).parent / "fixtures" / "A Brief History of Time - Notebook.html"
 
@@ -147,3 +152,70 @@ def test_parse_md_dir_malformed_file_reported(tmp_path: Path) -> None:
     result = parse_md_highlights_dir(str(tmp_path))
     assert len(result["highlights"]) == 4
     assert "000 - bad.md" in result["parse_errors"]
+
+
+# --- generate_book_index prompt ---
+
+
+def test_generate_book_index_returns_message() -> None:
+    result = generate_book_index(str(MD_FIXTURES))
+    assert len(result) == 1
+    assert result[0].role == "user"
+    text = result[0].content.text
+    assert "A Brief History of Time" in text
+    assert "Stephen Hawking" in text
+
+
+def test_generate_book_index_contains_highlights() -> None:
+    result = generate_book_index(str(MD_FIXTURES))
+    text = result[0].content.text
+    # All 4 highlight titles should appear in the prompt
+    assert "A Well-Known Scientist" in text
+    assert "Any Physical Theory" in text
+
+
+def test_generate_book_index_wikilinks() -> None:
+    result = generate_book_index(str(MD_FIXTURES))
+    text = result[0].content.text
+    assert "[[notes/001 - " in text
+
+
+def test_generate_book_index_chapter_grouping() -> None:
+    result = generate_book_index(str(MD_FIXTURES))
+    text = result[0].content.text
+    assert "Our Picture of the Universe" in text
+
+
+def test_generate_book_index_missing_path() -> None:
+    result = generate_book_index("/tmp/no_such_dir_xyz_abc")
+    assert len(result) == 1
+    assert result[0].role == "user"
+    text = result[0].content.text
+    assert "error" in text.lower() or "not found" in text.lower()
+
+
+def test_generate_book_index_file_not_dir(tmp_path: Path) -> None:
+    f = tmp_path / "not_a_dir.md"
+    f.write_text("content", encoding="utf-8")
+    result = generate_book_index(str(f))
+    assert len(result) == 1
+    text = result[0].content.text
+    assert "error" in text.lower() or "not a directory" in text.lower()
+
+
+def test_generate_book_index_empty_dir(tmp_path: Path) -> None:
+    result = generate_book_index(str(tmp_path))
+    assert len(result) == 1
+    text = result[0].content.text
+    assert len(text) > 0
+
+
+def test_generate_book_index_malformed_skipped(tmp_path: Path) -> None:
+    for src in MD_FIXTURES.glob("*.md"):
+        shutil.copy(src, tmp_path / src.name)
+    bad = tmp_path / "000 - bad.md"
+    bad.write_text("no frontmatter here", encoding="utf-8")
+    result = generate_book_index(str(tmp_path))
+    text = result[0].content.text
+    assert "A Brief History of Time" in text
+    assert "000 - bad.md" in text

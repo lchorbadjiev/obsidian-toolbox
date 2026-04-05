@@ -58,6 +58,7 @@ For full workflow details: `bd prime`
 ## Active Technologies
 - Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps (002-parse-md-highlights)
 - N/A (read-only; no files written) (002-parse-md-highlights)
+- Python 3.12+ + `mcp` (FastMCP) — already installed; `click` — already installed (003-book-index-prompt)
 
 ## Recent Changes
 - 002-parse-md-highlights: Added Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps

@@ -1,20 +1,25 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.0 → 1.1.1
+Version change: 1.1.1 → 1.2.0
 
-Modified principles:
-  V. Simplicity and Minimal Dependencies — removed explicit prohibition on `pyyaml`;
-     frontmatter parsing now permits pyyaml as an approved dependency alongside regex.
-Added sections: N/A
+Modified principles: None renamed.
+
+Added sections:
+  VII. Document Formatting — 80-character line width rule for all markdown
+       documents produced during speckit workflow (specs, plans, tasks,
+       research, quickstart, data-model, contracts).
+
 Removed sections: N/A
 
 Templates checked:
-  ✅ .specify/templates/plan-template.md — No pyyaml-specific references; no update needed.
-  ✅ .specify/templates/spec-template.md — No dependency policy references; no update needed.
-  ✅ .specify/templates/tasks-template.md — No change required.
-  ✅ .specify/templates/constitution-template.md — Source template; no changes needed.
-  ✅ .specify/templates/commands/ — Directory is empty; no command files to update.
+  ✅ .specify/templates/plan-template.md — Added formatting note.
+  ✅ .specify/templates/spec-template.md — No structural change needed;
+     principle applies to generated output, not the template itself.
+  ✅ .specify/templates/tasks-template.md — No structural change needed.
+  ✅ .specify/templates/constitution-template.md — Source template;
+     no changes needed.
+  ✅ .specify/templates/commands/ — Directory is empty.
 
 Follow-up TODOs: None.
 -->
@@ -112,6 +117,23 @@ without shell invocation. stdio is the simplest, most portable transport and ali
 with Principle V (Simplicity). Sharing implementation with CLI (Principle I) prevents
 drift between the two interfaces.
 
+### VII. Document Formatting
+
+All markdown documents produced during the speckit workflow — including
+specs, plans, tasks, research notes, quickstart guides, data models, and
+contract definitions — MUST wrap prose lines at 80 characters.
+
+- Hard line breaks MUST be used for prose paragraphs and bullet points;
+  do not rely on soft-wrap rendering.
+- Code blocks, tables, and wikilinks are exempt from the 80-character
+  limit when wrapping would break syntax or readability.
+- Frontmatter (YAML) values are exempt.
+- Headings are exempt (keep them on one line).
+
+**Rationale**: Consistent line width makes diffs readable, enables
+side-by-side comparison in terminals and code review tools, and ensures
+documents render predictably in any Markdown viewer or editor.
+
 ## Technology Stack
 
 - **Language**: Python 3.12+
@@ -166,4 +188,4 @@ the Complexity Tracking table.
 
 Use `CLAUDE.md` for runtime development guidance (commands, architecture, file layout).
 
-**Version**: 1.1.1 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-05
+**Version**: 1.2.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-05

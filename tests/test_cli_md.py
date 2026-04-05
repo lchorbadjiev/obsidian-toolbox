@@ -27,3 +27,18 @@ def test_md_count_nonexistent_path() -> None:
     runner = CliRunner()
     result = runner.invoke(main, ["md", "count", "/tmp/no_such_dir_xyz"])
     assert result.exit_code != 0
+
+
+def test_md_index_prompt_valid_dir() -> None:
+    runner = CliRunner()
+    result = runner.invoke(main, ["md", "index-prompt", str(MD_FIXTURES)])
+    assert result.exit_code == 0
+    assert "A Brief History of Time" in result.output
+
+
+def test_md_index_prompt_nonexistent_path() -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["md", "index-prompt", "/tmp/no_such_dir_xyz"]
+    )
+    assert result.exit_code != 0
