@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 
+from otb.md_parser import parse_highlight_dir
 from otb.mcp_server import run as mcp_run
 from otb.parser import parse_notebook
 
@@ -22,6 +23,18 @@ def kindle() -> None:
 def mcp_serve() -> None:
     """Start the MCP server using stdio transport."""
     mcp_run()
+
+
+@main.group()
+def md() -> None:
+    """Commands for markdown highlight files."""
+
+
+@md.command("count")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, path_type=Path))
+def md_count(path: Path) -> None:
+    """Print the number of highlights in a directory of markdown highlight files."""
+    click.echo(len(parse_highlight_dir(path)))
 
 
 @kindle.command("count")

@@ -1,5 +1,6 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,use-implicit-booleaness-not-comparison
 """Tests for the MCP server tool handlers."""
+import shutil
 from pathlib import Path
 
 import stat
@@ -7,7 +8,7 @@ import sys
 
 import pytest
 
-from otb.mcp_server import parse_kindle_export, save_highlights
+from otb.mcp_server import parse_kindle_export, parse_md_highlights_dir, save_highlights
 
 FIXTURE = Path(__file__).parent / "fixtures" / "A Brief History of Time - Notebook.html"
 
@@ -84,3 +85,65 @@ def test_save_non_writable_directory_raises(tmp_path: Path) -> None:
             save_highlights(highlights[:1], str(target))
     finally:
         target.chmod(stat.S_IRWXU)
+
+
+# --- parse_md_highlights_dir tool ---
+
+MD_FIXTURES = Path(__file__).parent / "fixtures" / "highlights"
+
+
+def test_parse_md_dir_returns_highlights() -> None:
+    result = parse_md_highlights_dir(str(MD_FIXTURES))
+    assert result["highlights"] != [] and len(result["highlights"]) == 4
+
+
+def test_parse_md_dir_sorted_order() -> None:
+    result = parse_md_highlights_dir(str(MD_FIXTURES))
+    numbers = [h["number"] for h in result["highlights"]]
+    assert numbers == sorted(numbers)
+
+
+def test_parse_md_dir_highlight_fields() -> None:
+    result = parse_md_highlights_dir(str(MD_FIXTURES))
+    h = result["highlights"][0]
+    assert h["book_title"] == "A Brief History of Time"
+    assert h["author"] == "Stephen Hawking"
+    assert "text" in h
+    assert "chapter" in h
+    assert "page" in h
+    assert "location" in h
+    assert "number" in h
+
+
+def test_parse_md_dir_no_parse_errors() -> None:
+    result = parse_md_highlights_dir(str(MD_FIXTURES))
+    assert result["parse_errors"] == {}
+
+
+def test_parse_md_dir_empty_directory(tmp_path: Path) -> None:
+    result = parse_md_highlights_dir(str(tmp_path))
+    assert result["highlights"] == []
+    assert result["parse_errors"] == {}
+
+
+def test_parse_md_dir_missing_path() -> None:
+    with pytest.raises(FileNotFoundError):
+        parse_md_highlights_dir("/tmp/no_such_dir_xyz")
+
+
+def test_parse_md_dir_file_not_directory(tmp_path: Path) -> None:
+    f = tmp_path / "not_a_dir.md"
+    f.write_text("content", encoding="utf-8")
+    with pytest.raises(NotADirectoryError):
+        parse_md_highlights_dir(str(f))
+
+
+def test_parse_md_dir_malformed_file_reported(tmp_path: Path) -> None:
+    # Copy a valid fixture then add a malformed file
+    for src in MD_FIXTURES.glob("*.md"):
+        shutil.copy(src, tmp_path / src.name)
+    bad = tmp_path / "000 - bad.md"
+    bad.write_text("no frontmatter here", encoding="utf-8")
+    result = parse_md_highlights_dir(str(tmp_path))
+    assert len(result["highlights"]) == 4
+    assert "000 - bad.md" in result["parse_errors"]
