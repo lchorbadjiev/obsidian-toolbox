@@ -11,34 +11,34 @@ import pytest
 from otb.mcp_server import (
     generate_book_index,
     parse_kindle_export,
-    parse_md_highlights_dir,
-    save_highlights,
+    parse_md_annotations_dir,
+    save_annotations,
 )
 
 FIXTURE = Path(__file__).parent / "fixtures" / "A Brief History of Time - Notebook.html"
 
 
-def test_parse_returns_highlights() -> None:
+def test_parse_returns_annotations() -> None:
     result = parse_kindle_export(str(FIXTURE))
     assert len(result) == 4
 
 
 def test_parse_no_titles() -> None:
     result = parse_kindle_export(str(FIXTURE))
-    assert all(h["title"] == "" for h in result)
+    assert all(a["title"] == "" for a in result)
 
 
-def test_parse_highlight_fields() -> None:
+def test_parse_annotation_fields() -> None:
     result = parse_kindle_export(str(FIXTURE))
-    h = result[0]
-    assert h["book_title"] == "A Brief History of Time"
-    assert h["author"] == "Stephen Hawking"
-    assert h["chapter"] == "1   Our Picture of the Universe"
-    assert h["page"] == 1
-    assert h["location"] == 42
-    assert h["text"] == "A well-known scientist once gave a public lecture on astronomy."
-    assert h["color"] == "yellow"
-    assert h["number"] == 1
+    a = result[0]
+    assert a["book_title"] == "A Brief History of Time"
+    assert a["author"] == "Stephen Hawking"
+    assert a["chapter"] == "1   Our Picture of the Universe"
+    assert a["page"] == 1
+    assert a["location"] == 42
+    assert a["text"] == "A well-known scientist once gave a public lecture on astronomy."
+    assert a["color"] == "yellow"
+    assert a["number"] == 1
 
 
 def test_parse_missing_file() -> None:
@@ -47,7 +47,7 @@ def test_parse_missing_file() -> None:
 
 
 def test_parse_empty_export(tmp_path: Path) -> None:
-    # Minimal valid HTML with no highlights
+    # Minimal valid HTML with no annotations
     empty_html = tmp_path / "empty.html"
     empty_html.write_text(
         """<html><body>
@@ -61,21 +61,21 @@ def test_parse_empty_export(tmp_path: Path) -> None:
     assert result == []
 
 
-# --- save_highlights tool ---
+# --- save_annotations tool ---
 
 def test_save_returns_paths(tmp_path: Path) -> None:
-    highlights = parse_kindle_export(str(FIXTURE))
-    for h in highlights:
-        h["title"] = "Generated Title"
-    paths = save_highlights(highlights, str(tmp_path / "out"))
+    annotations = parse_kindle_export(str(FIXTURE))
+    for a in annotations:
+        a["title"] = "Generated Title"
+    paths = save_annotations(annotations, str(tmp_path / "out"))
     assert len(paths) == 4
     assert all(Path(p).exists() for p in paths)
 
 
 def test_save_creates_directory(tmp_path: Path) -> None:
     target = str(tmp_path / "new" / "subdir")
-    highlights = parse_kindle_export(str(FIXTURE))
-    paths = save_highlights(highlights[:1], target)
+    annotations = parse_kindle_export(str(FIXTURE))
+    paths = save_annotations(annotations[:1], target)
     assert Path(paths[0]).exists()
 
 
@@ -84,63 +84,63 @@ def test_save_non_writable_directory_raises(tmp_path: Path) -> None:
     target = tmp_path / "readonly"
     target.mkdir()
     target.chmod(stat.S_IRUSR | stat.S_IXUSR)
-    highlights = parse_kindle_export(str(FIXTURE))
+    annotations = parse_kindle_export(str(FIXTURE))
     try:
         with pytest.raises(OSError):
-            save_highlights(highlights[:1], str(target))
+            save_annotations(annotations[:1], str(target))
     finally:
         target.chmod(stat.S_IRWXU)
 
 
-# --- parse_md_highlights_dir tool ---
+# --- parse_md_annotations_dir tool ---
 
-MD_FIXTURES = Path(__file__).parent / "fixtures" / "highlights"
+MD_FIXTURES = Path(__file__).parent / "fixtures" / "annotations"
 
 
-def test_parse_md_dir_returns_highlights() -> None:
-    result = parse_md_highlights_dir(str(MD_FIXTURES))
-    assert result["highlights"] != [] and len(result["highlights"]) == 4
+def test_parse_md_dir_returns_annotations() -> None:
+    result = parse_md_annotations_dir(str(MD_FIXTURES))
+    assert result["annotations"] != [] and len(result["annotations"]) == 4
 
 
 def test_parse_md_dir_sorted_order() -> None:
-    result = parse_md_highlights_dir(str(MD_FIXTURES))
-    numbers = [h["number"] for h in result["highlights"]]
+    result = parse_md_annotations_dir(str(MD_FIXTURES))
+    numbers = [a["number"] for a in result["annotations"]]
     assert numbers == sorted(numbers)
 
 
-def test_parse_md_dir_highlight_fields() -> None:
-    result = parse_md_highlights_dir(str(MD_FIXTURES))
-    h = result["highlights"][0]
-    assert h["book_title"] == "A Brief History of Time"
-    assert h["author"] == "Stephen Hawking"
-    assert "text" in h
-    assert "chapter" in h
-    assert "page" in h
-    assert "location" in h
-    assert "number" in h
+def test_parse_md_dir_annotation_fields() -> None:
+    result = parse_md_annotations_dir(str(MD_FIXTURES))
+    a = result["annotations"][0]
+    assert a["book_title"] == "A Brief History of Time"
+    assert a["author"] == "Stephen Hawking"
+    assert "text" in a
+    assert "chapter" in a
+    assert "page" in a
+    assert "location" in a
+    assert "number" in a
 
 
 def test_parse_md_dir_no_parse_errors() -> None:
-    result = parse_md_highlights_dir(str(MD_FIXTURES))
+    result = parse_md_annotations_dir(str(MD_FIXTURES))
     assert result["parse_errors"] == {}
 
 
 def test_parse_md_dir_empty_directory(tmp_path: Path) -> None:
-    result = parse_md_highlights_dir(str(tmp_path))
-    assert result["highlights"] == []
+    result = parse_md_annotations_dir(str(tmp_path))
+    assert result["annotations"] == []
     assert result["parse_errors"] == {}
 
 
 def test_parse_md_dir_missing_path() -> None:
     with pytest.raises(FileNotFoundError):
-        parse_md_highlights_dir("/tmp/no_such_dir_xyz")
+        parse_md_annotations_dir("/tmp/no_such_dir_xyz")
 
 
 def test_parse_md_dir_file_not_directory(tmp_path: Path) -> None:
     f = tmp_path / "not_a_dir.md"
     f.write_text("content", encoding="utf-8")
     with pytest.raises(NotADirectoryError):
-        parse_md_highlights_dir(str(f))
+        parse_md_annotations_dir(str(f))
 
 
 def test_parse_md_dir_malformed_file_reported(tmp_path: Path) -> None:
@@ -149,8 +149,8 @@ def test_parse_md_dir_malformed_file_reported(tmp_path: Path) -> None:
         shutil.copy(src, tmp_path / src.name)
     bad = tmp_path / "000 - bad.md"
     bad.write_text("no frontmatter here", encoding="utf-8")
-    result = parse_md_highlights_dir(str(tmp_path))
-    assert len(result["highlights"]) == 4
+    result = parse_md_annotations_dir(str(tmp_path))
+    assert len(result["annotations"]) == 4
     assert "000 - bad.md" in result["parse_errors"]
 
 
@@ -166,10 +166,10 @@ def test_generate_book_index_returns_message() -> None:
     assert "Stephen Hawking" in text
 
 
-def test_generate_book_index_contains_highlights() -> None:
+def test_generate_book_index_contains_annotations() -> None:
     result = generate_book_index(str(MD_FIXTURES))
     text = result[0].content.text
-    # All 4 highlight titles should appear in the prompt
+    # All 4 annotation titles should appear in the prompt
     assert "A Well-Known Scientist" in text
     assert "Any Physical Theory" in text
 

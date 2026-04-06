@@ -43,18 +43,18 @@ without writing Python.
 
 ### II. Shared Parser Contract
 
-All parsers MUST produce `list[Highlight]` using the `Highlight` dataclas
+All parsers MUST produce `list[Annotation]` using the `Annotation` dataclass
 defined in `src/otb/parser.py`. Parser-specific data models are prohibited.
 
 **Rationale**: A unified output contract allows CLI commands, MCP tools, and future
-exporters to consume highlights from any source interchangeably.
+exporters to consume annotations from any source interchangeably.
 
 ### III. Test-First (NON-NEGOTIABLE)
 
 Tests MUST be written and confirmed to fail before any implementation code is added.
 The Red-Green-Refactor cycle is strictly enforced.
 
-- Test fixtures MUST live in `tests/fixtures/` (HTML files and `tests/fixtures/highlights/`
+- Test fixtures MUST live in `tests/fixtures/` (HTML files and `tests/fixtures/annotations/`
   for markdown files).
 - `uv run pytest` MUST pass with no failures before any commit.
 - New parsers MUST have at least one fixture-based integration test.

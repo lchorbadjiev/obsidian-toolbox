@@ -1,8 +1,8 @@
-"""Parser for highlight markdown files."""
+"""Parser for annotation markdown files."""
 import re
 from pathlib import Path
 
-from otb.parser import Book, Highlight
+from otb.parser import Annotation, Book
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
 _FRONTMATTER_LINE_RE = re.compile(r'^(\w+):\s*"?([^"\n]+)"?\s*$')
@@ -22,8 +22,8 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
     return result
 
 
-def parse_highlight_md(path: Path) -> Highlight:
-    """Parse a highlight markdown file into a Highlight dataclass."""
+def parse_annotation_md(path: Path) -> Annotation:
+    """Parse an annotation markdown file into an Annotation dataclass."""
     text = path.read_text(encoding="utf-8")
     fm = _parse_frontmatter(text)
 
@@ -35,7 +35,7 @@ def parse_highlight_md(path: Path) -> Highlight:
     if not blockquote:
         raise ValueError(f"No blockquote found in {path}")
 
-    return Highlight(
+    return Annotation(
         book=book,
         chapter=fm["chapter"],
         page=int(fm["page"]),
@@ -46,6 +46,6 @@ def parse_highlight_md(path: Path) -> Highlight:
     )
 
 
-def parse_highlight_dir(directory: Path) -> list[Highlight]:
-    """Parse all highlight markdown files in a directory, sorted by filename."""
-    return [parse_highlight_md(p) for p in sorted(directory.glob("*.md"))]
+def parse_annotation_dir(directory: Path) -> list[Annotation]:
+    """Parse all annotation markdown files in a directory, sorted by filename."""
+    return [parse_annotation_md(p) for p in sorted(directory.glob("*.md"))]

@@ -6,7 +6,7 @@ from click.testing import CliRunner
 
 from otb.cli import main
 
-MD_FIXTURES = Path(__file__).parent / "fixtures" / "highlights"
+MD_FIXTURES = Path(__file__).parent / "fixtures" / "annotations"
 
 
 def test_md_count_valid_dir() -> None:

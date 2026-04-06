@@ -16,8 +16,8 @@ class Book:
 
 @dataclass
 # pylint: disable=too-many-instance-attributes  # fixed data contract; fields cannot be reduced
-class Highlight:
-    """A single Kindle highlight."""
+class Annotation:
+    """A single Kindle annotation."""
 
     book: Book
     chapter: str
@@ -47,13 +47,13 @@ _NOTE_HEADING_RE = re.compile(
 )
 
 
-def _parse_highlight(
+def _parse_annotation(
     book: Book, chapter: str, pending: dict[str, str | int], text_div: Tag,
     generate_title: bool = True,
-) -> Highlight:
-    """Build a Highlight from a parsed noteHeading and its noteText div."""
+) -> Annotation:
+    """Build an Annotation from a parsed noteHeading and its noteText div."""
     text = text_div.get_text(strip=True)
-    return Highlight(
+    return Annotation(
         book=book,
         chapter=chapter,
         page=int(pending["page"]),
@@ -73,8 +73,8 @@ def _require(tag: Tag | None, desc: str) -> Tag:
 
 def parse_notebook(  # pylint: disable=too-many-locals  # sequential HTML parsing requires tracking several state variables
     path: Path, generate_title: bool = True
-) -> list[Highlight]:
-    """Parse a Kindle notebook HTML export and return all highlights."""
+) -> list[Annotation]:
+    """Parse a Kindle notebook HTML export and return all annotations."""
     soup = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser")
 
     title = _require(soup.find("div", class_="bookTitle"), "bookTitle").get_text(strip=True)
@@ -84,7 +84,7 @@ def parse_notebook(  # pylint: disable=too-many-locals  # sequential HTML parsin
     author = f"{parts[1]} {parts[0]}" if len(parts) == 2 else authors_raw
     book = Book(title=title, author=author)
 
-    highlights: list[Highlight] = []
+    annotations: list[Annotation] = []
     current_chapter = ""
     pending: dict[str, str | int] | None = None
 
@@ -112,10 +112,12 @@ def parse_notebook(  # pylint: disable=too-many-locals  # sequential HTML parsin
             continue
 
         if "noteText" in classes and pending is not None:
-            highlights.append(_parse_highlight(book, current_chapter, pending, div, generate_title))
+            annotations.append(
+                _parse_annotation(book, current_chapter, pending, div, generate_title)
+            )
             pending = None
 
-    for i, h in enumerate(highlights, start=1):
-        h.number = i
+    for i, a in enumerate(annotations, start=1):
+        a.number = i
 
-    return highlights
+    return annotations

@@ -4,7 +4,7 @@ author: Stephen Hawking
 chapter: "2   Space and Time"
 page: 22
 location: 310
-type: highlight
+type: annotation
 number: 3
 ---
 
