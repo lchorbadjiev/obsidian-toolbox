@@ -21,7 +21,8 @@ This installs the `otb` CLI command.
 Add the server to your Claude Code MCP configuration:
 
 ```bash
-claude mcp add obsidian-toolbox -- uv --directory /path/to/obsidian-toolbox run otb mcp
+claude mcp add obsidian-toolbox \
+  -- uv --directory /path/to/obsidian-toolbox run otb mcp
 ```
 
 Replace `/path/to/obsidian-toolbox` with the absolute path to this
@@ -37,13 +38,13 @@ Once added, Claude Code will start the server automatically when you
 open a project. The following tools and prompts become available to
 the agent:
 
-| Name | Type | Description |
-|------|------|-------------|
-| `parse_kindle_export` | tool | Parse a Kindle HTML export into annotations |
-| `save_annotations` | tool | Save annotations as individual `.md` files |
-| `parse_md_annotations_dir` | tool | Read a directory of annotation `.md` files |
-| `anki_export` | tool | Export annotation `.md` files to an Anki deck |
-| `generate_book_index` | prompt | Generate a book index from an annotations dir |
+| Name                       | Type   | Description                           |
+| -------------------------- | ------ | ------------------------------------- |
+| `parse_kindle_export`      | tool   | Parse a Kindle HTML export            |
+| `save_annotations`         | tool   | Save annotations as `.md` files       |
+| `parse_md_annotations_dir` | tool   | Read a directory of annotation files  |
+| `anki_export`              | tool   | Export annotations to an Anki deck    |
+| `generate_book_index`      | prompt | Generate a book index markdown file   |
 
 ## Workflow: Kindle Export → Markdown Annotations → Book Index
 
@@ -61,6 +62,7 @@ Ask Claude (with the MCP server active):
 > `~/notes/a-brief-history/notes/`.
 
 Claude will:
+
 1. Call `parse_kindle_export` to read the HTML file.
 2. Generate a concise title (under 10 words) for each annotation.
 3. Call `save_annotations` to write one `.md` file per annotation.
@@ -96,6 +98,7 @@ Ask Claude:
 > as `~/notes/a-brief-history/A Brief History of Time - Index.md`.
 
 Claude will:
+
 1. Call the `generate_book_index` prompt, which reads all annotation
    files and returns structured context.
 2. Write a prose summary of the book.
@@ -164,13 +167,13 @@ otb anki export ~/notes/a-brief-history/notes/ --anki-url http://localhost:8080
 
 Output:
 
-```
+```text
 Created: 42  Skipped: 0  Failed: 0
 ```
 
 Re-running after adding new annotations only exports the new ones:
 
-```
+```text
 Created: 3  Skipped: 42  Failed: 0
 ```
 
