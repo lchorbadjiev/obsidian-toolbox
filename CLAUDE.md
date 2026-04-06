@@ -11,7 +11,8 @@ uv run pytest                  # run all tests
 uv run pytest tests/test_X.py  # run a single test file
 uv run mypy src/ tests/        # type-check
 uv run pylint src/ tests/      # lint (target: 10/10)
-npx markdownlint-cli "**/*.md" # markdown lint (zero errors)
+pymarkdownlnt scan "**/*.md"   # markdown lint (zero errors)
+pymarkdownlnt fix "**/*.md"   # autofix easy formatting issues
 ```
 
 ## Architecture
@@ -70,6 +71,8 @@ After `br sync --flush-only`, you must manually run
 - Python 3.12+ + `mcp` (FastMCP) — already installed; `click` — already installed (003-book-index-prompt)
 - Python 3.12+ + `click`, `mcp` (FastMCP) — already installed; (005-anki-cards-export)
 - N/A (read-only from source; writes go to Anki via AnkiConnect) (005-anki-cards-export)
+- Python 3.12+ + click, mcp (FastMCP) -- already (006-parse-zotero-annotations)
+- Filesystem (reads Zotero exports, writes markdown (006-parse-zotero-annotations)
 
 ## Recent Changes
 - 002-parse-md-highlights: Added Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps

@@ -6,8 +6,10 @@ import click
 
 from otb.anki import AnkiConnectError, export_annotations
 from otb.md_parser import parse_annotation_dir, parse_annotation_dir_with_paths
+from otb.md_writer import write_annotations
 from otb.mcp_server import _build_index_prompt, run as mcp_run
 from otb.parser import parse_notebook
+from otb.zotero_parser import parse_zotero_annotations
 
 
 @click.group()
@@ -84,3 +86,22 @@ def anki_export_cmd(path: Path, deck: str, anki_url: str) -> None:
         click.echo(str(exc), err=True)
         sys.exit(1)
     click.echo(f"Created: {result.created}  Skipped: {result.skipped}  Failed: {result.failed}")
+
+
+@main.group()
+def zotero() -> None:
+    """Commands for Zotero annotation exports."""
+
+
+@zotero.command("parse")
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument("output_dir", type=click.Path(file_okay=False, path_type=Path))
+def zotero_parse(input_dir: Path, output_dir: Path) -> None:
+    """Parse Zotero annotations and write individual markdown files."""
+    try:
+        annotations = parse_zotero_annotations(input_dir)
+    except FileNotFoundError as exc:
+        click.echo(str(exc), err=True)
+        sys.exit(1)
+    write_annotations(annotations, output_dir)
+    click.echo(len(annotations))

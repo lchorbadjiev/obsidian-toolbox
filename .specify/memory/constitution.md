@@ -1,13 +1,16 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.2.0 → 1.3.0
+Version change: 1.3.0 → 1.4.0
 
 Modified principles:
-  VII. Document Formatting — Added markdownlint enforcement requirement
-       for all markdown files in the repository (not just speckit docs).
+  VII. Document Formatting — Replaced markdownlint-cli (npx) with
+       pymarkdownlnt (Python dev dependency). Added `pymarkdownlnt fix`
+       for autofixing easy formatting issues.
 
-Added sections: N/A
+Modified sections:
+  Technology Stack — Updated markdown linting tool reference.
+  Development Workflow — Updated pre-commit command.
 
 Removed sections: N/A
 
@@ -19,7 +22,7 @@ Templates checked:
      no changes needed.
   ✅ .specify/templates/commands/ — Directory is empty.
 
-Follow-up TODOs: None.
+Follow-up TODOs: Update CLAUDE.md markdownlint command.
 -->
 
 # Obsidian Toolbox Constitution
@@ -129,19 +132,20 @@ contract definitions — MUST wrap prose lines at 80 characters.
 - Headings are exempt (keep them on one line).
 
 All markdown files committed to the repository MUST pass
-`npx markdownlint-cli <file>` with zero errors before committing.
+`pymarkdownlnt scan <file>` with zero errors before committing.
+Use `pymarkdownlnt fix <file>` to autofix easy formatting issues.
 This applies to every `.md` file: README, specs, plans, tasks,
 research notes, quickstart guides, data models, and contract
 definitions.
 
-- Run `npx markdownlint-cli "**/*.md"` from the repo root to check
+- Run `pymarkdownlnt scan "**/*.md"` from the repo root to check
   all files at once, or target a single file as needed.
 - If a rule conflicts with a legitimate formatting need (e.g. a long
   URL that cannot be wrapped), disable the specific rule inline with
-  a `<!-- markdownlint-disable-line MDXXX -->` comment and add a
+  a `<!-- pyml disable-next-line md0XX-->` comment and add a
   one-line justification comment immediately above it.
 - Project-wide rule overrides MUST be recorded in
-  `.markdownlint.json` at the repo root with a comment explaining
+  `.pymarkdown.json` at the repo root with a comment explaining
   the rationale.
 
 **Rationale**: Consistent line width makes diffs readable, enables
@@ -159,7 +163,7 @@ misses.
 - **Testing**: pytest with fixture files in `tests/fixtures/`
 - **Type-checking**: mypy (strict, zero-error target)
 - **Linting**: pylint (10/10 target)
-- **Markdown linting**: markdownlint-cli via `npx` (zero-error target)
+- **Markdown linting**: pymarkdownlnt (`pymarkdownlnt scan` to check, `pymarkdownlnt fix` to autofix; zero-error target)
 - **Project layout**: `src` layout — package root at `src/otb/`
 
 Adding or removing a technology from this stack constitutes a MINOR amendment if additive
@@ -168,7 +172,7 @@ or a MAJOR amendment if a listed tool is removed or replaced.
 ## Development Workflow
 
 - **Before committing**: `uv run pytest` AND `uv run mypy src/ tests/` AND
-  `uv run pylint src/ tests/` AND `npx markdownlint-cli "**/*.md"` MUST
+  `uv run pylint src/ tests/` AND `pymarkdownlnt scan "**/*.md"` MUST
   all pass cleanly.
 - **New parser**: add fixture → write failing test → implement → verify green.
 - **New CLI command**: add Click command → wire to parser or service function → add
@@ -206,4 +210,4 @@ the Complexity Tracking table.
 
 Use `CLAUDE.md` for runtime development guidance (commands, architecture, file layout).
 
-**Version**: 1.3.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-06
+**Version**: 1.4.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-06

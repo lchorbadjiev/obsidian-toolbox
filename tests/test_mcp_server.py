@@ -14,6 +14,7 @@ from otb.mcp_server import (
     generate_book_index,
     parse_kindle_export,
     parse_md_annotations_dir,
+    parse_zotero_export,
     save_annotations,
 )
 
@@ -264,3 +265,37 @@ def test_anki_export_tool_anki_unreachable_raises() -> None:
     ):
         with pytest.raises(AnkiConnectError):
             anki_export(str(MD_FIXTURES))
+
+
+# --- parse_zotero_export tool ---
+
+ZOTERO_FIXTURES = Path(__file__).parent / "fixtures" / "zotero"
+
+
+def test_parse_zotero_export_returns_annotations() -> None:
+    result = parse_zotero_export(str(ZOTERO_FIXTURES))
+    assert len(result) == 306
+
+
+def test_parse_zotero_export_annotation_fields() -> None:
+    result = parse_zotero_export(str(ZOTERO_FIXTURES))
+    a = result[0]
+    assert a["book_title"] == "Refactoring: Improving the Design of Existing Code"
+    assert a["author"] == "Martin Fowler"
+    assert a["page"] == 11
+    assert a["location"] == 11
+    assert a["color"] is None
+    assert a["number"] == 1
+    assert a["title"]  # non-empty
+
+
+def test_parse_zotero_export_missing_directory() -> None:
+    with pytest.raises(FileNotFoundError):
+        parse_zotero_export("/tmp/no_such_zotero_dir_xyz")
+
+
+def test_parse_zotero_export_file_not_directory(tmp_path: Path) -> None:
+    f = tmp_path / "not_a_dir.md"
+    f.write_text("x", encoding="utf-8")
+    with pytest.raises(NotADirectoryError):
+        parse_zotero_export(str(f))

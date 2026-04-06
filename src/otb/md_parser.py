@@ -5,7 +5,7 @@ from pathlib import Path
 from otb.parser import Annotation, Book
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
-_FRONTMATTER_LINE_RE = re.compile(r'^(\w+):\s*"?([^"\n]+)"?\s*$')
+_FRONTMATTER_LINE_RE = re.compile(r'^(\w+):\s*"([^"\n]*)"|^(\w+):\s*(.+)$')
 _BLOCKQUOTE_RE = re.compile(r"^>\s+(.+)$", re.MULTILINE)
 _H1_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
 
@@ -18,7 +18,10 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
     for line in match.group(1).splitlines():
         m = _FRONTMATTER_LINE_RE.match(line)
         if m:
-            result[m.group(1)] = m.group(2).strip()
+            if m.group(1) is not None:
+                result[m.group(1)] = m.group(2)
+            else:
+                result[m.group(3)] = m.group(4).strip()
     return result
 
 

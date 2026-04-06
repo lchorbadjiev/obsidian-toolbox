@@ -17,6 +17,7 @@ from otb.anki import export_annotations
 from otb.md_parser import parse_annotation_dir_with_paths, parse_annotation_md
 from otb.md_writer import write_annotations
 from otb.parser import Annotation, Book, parse_notebook
+from otb.zotero_parser import parse_zotero_annotations
 
 mcp = FastMCP(
     "obsidian-toolbox",
@@ -256,6 +257,27 @@ def anki_export(
     resolved_deck = deck or annotated_paths[0][1].book.title
     result = export_annotations(annotated_paths, deck=resolved_deck, anki_url=anki_url)
     return {"created": result.created, "skipped": result.skipped, "failed": result.failed}
+
+
+@mcp.tool(
+    description=(
+        "Parse a Zotero annotation export directory and return all annotations "
+        "as a list. The directory must contain Annotations.md and book.txt. "
+        "Each annotation has: book_title, author, chapter, page, location, text, "
+        "title (auto-generated), color (always null), number. "
+        "Raises FileNotFoundError if the directory or required files do not exist. "
+        "Raises NotADirectoryError if the path is not a directory."
+    )
+)
+def parse_zotero_export(path: str) -> list[dict[str, Any]]:
+    """Return annotations from a Zotero export directory."""
+    resolved = Path(path)
+    if not resolved.exists():
+        raise FileNotFoundError(f"Directory not found: {path}")
+    if not resolved.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+    annotations = parse_zotero_annotations(resolved)
+    return [_annotation_to_dict(a) for a in annotations]
 
 
 def run() -> None:

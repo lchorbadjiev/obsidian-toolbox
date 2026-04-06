@@ -1,0 +1,32 @@
+Title 
+Refactoring: Improving the Design of Existing Code
+Authors 
+Martin Fowler
+Ids 
+9780134757704, Google
+Tags 
+Computers, General, Object Oriented, Programming, Software Development & Engineering
+Formats 
+EPUB
+Folder 
+Book files
+Publisher 
+Addison-Wesley Professional
+Author sort 
+Fowler, Martin
+Title sort 
+Refactoring: Improving the Design of Existing Code
+Date 
+28 Nov 2024
+uuid 
+a7904187-f0d1-4c49-97df-535db59a0886
+Id 
+1358
+Published 
+Nov 2018
+Modified 
+28 Nov 2024
+Size 
+34.95 MB
+Languages 
+English
