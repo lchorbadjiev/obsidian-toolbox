@@ -42,18 +42,26 @@ Fixtures live in `tests/fixtures/`: one HTML file and `tests/fixtures/annotation
 
 
 --- BEGIN AGENTS.MD CONTENT ---
-## Issue Tracking
+## Issue Tracking with br (beads_rust)
 
-This project uses **bd (beads)** for issue tracking.
-Run `bd prime` for workflow context, or install hooks (`bd hooks install`) for auto-injection.
+**Note:** `br` is non-invasive and never executes git commands.
+After `br sync --flush-only`, you must manually run
+`git add .beads/ && git commit`.
 
 **Quick reference:**
-- `bd ready` - Find unblocked work
-- `bd create "Title" --type task --priority 2` - Create issue
-- `bd close <id>` - Complete work
-- `bd dolt push` - Push beads to remote
 
-For full workflow details: `bd prime`
+- `br ready` - Find unblocked work
+- `br create "Title" --type task --priority 2` - Create issue
+- `br close <id>` - Complete work
+- Sync and push:
+
+  ```bash
+  br sync --flush-only
+  git add .beads/
+  git commit -m "sync beads"
+  git push
+  ```
+
 --- END AGENTS.MD CONTENT ---
 
 ## Active Technologies
