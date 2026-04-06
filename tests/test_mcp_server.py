@@ -1,9 +1,11 @@
 # pylint: disable=missing-function-docstring,use-implicit-booleaness-not-comparison
 """Tests for the MCP server tool handlers."""
+import json
 import shutil
 import stat
 import sys
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -22,19 +24,23 @@ from otb.mcp_server import (
 FIXTURE = Path(__file__).parent / "fixtures" / "A Brief History of Time - Notebook.html"
 
 
-def test_parse_returns_annotations() -> None:
+def test_parse_returns_summary_with_count() -> None:
     result = parse_kindle_export(str(FIXTURE))
-    assert len(result) == 4
+    assert result["count"] == 4
 
 
-def test_parse_no_titles() -> None:
+def test_parse_no_titles_in_temp_file() -> None:
     result = parse_kindle_export(str(FIXTURE))
-    assert all(a["title"] == "" for a in result)
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = json.load(f)
+    assert all(a["title"] == "" for a in annotations)
 
 
-def test_parse_annotation_fields() -> None:
+def test_parse_annotation_fields_in_temp_file() -> None:
     result = parse_kindle_export(str(FIXTURE))
-    a = result[0]
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = json.load(f)
+    a = annotations[0]
     assert a["book_title"] == "A Brief History of Time"
     assert a["author"] == "Stephen Hawking"
     assert a["chapter"] == "1   Our Picture of the Universe"
@@ -62,24 +68,69 @@ def test_parse_empty_export(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     result = parse_kindle_export(str(empty_html))
-    assert result == []
+    assert result["count"] == 0
+
+
+# --- parse_kindle_export: file-path return ---
+
+
+def test_parse_returns_summary_dict() -> None:
+    result = parse_kindle_export(str(FIXTURE))
+    assert isinstance(result, dict)
+    assert set(result.keys()) == {"file_path", "count", "book_title", "author", "chapters"}
+
+
+def test_parse_temp_file_contains_annotations() -> None:
+    result = parse_kindle_export(str(FIXTURE))
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = json.load(f)
+    assert len(annotations) == 4
+    assert all(isinstance(a, dict) for a in annotations)
+    assert annotations[0]["book_title"] == "A Brief History of Time"
+
+
+def test_parse_count_matches_file() -> None:
+    result = parse_kindle_export(str(FIXTURE))
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = json.load(f)
+    assert result["count"] == len(annotations)
+
+
+def test_parse_chapters_list() -> None:
+    result = parse_kindle_export(str(FIXTURE))
+    assert isinstance(result["chapters"], list)
+    assert len(result["chapters"]) > 0
+    assert "1   Our Picture of the Universe" in result["chapters"]
+
+
+def test_parse_missing_file_still_raises() -> None:
+    with pytest.raises(FileNotFoundError):
+        parse_kindle_export("/tmp/does_not_exist.html")
 
 
 # --- save_annotations tool ---
 
+def _load_annotations_from_parse() -> list[dict[str, Any]]:
+    """Helper: parse fixture and load annotations from temp file."""
+    result = parse_kindle_export(str(FIXTURE))
+    with open(result["file_path"], encoding="utf-8") as f:
+        data: list[dict[str, Any]] = json.load(f)
+    return data
+
+
 def test_save_returns_paths(tmp_path: Path) -> None:
-    annotations = parse_kindle_export(str(FIXTURE))
+    annotations = _load_annotations_from_parse()
     for a in annotations:
         a["title"] = "Generated Title"
-    paths = save_annotations(annotations, str(tmp_path / "out"))
+    paths = save_annotations(annotations=annotations, directory=str(tmp_path / "out"))
     assert len(paths) == 4
     assert all(Path(p).exists() for p in paths)
 
 
 def test_save_creates_directory(tmp_path: Path) -> None:
     target = str(tmp_path / "new" / "subdir")
-    annotations = parse_kindle_export(str(FIXTURE))
-    paths = save_annotations(annotations[:1], target)
+    annotations = _load_annotations_from_parse()
+    paths = save_annotations(annotations=annotations[:1], directory=target)
     assert Path(paths[0]).exists()
 
 
@@ -88,12 +139,57 @@ def test_save_non_writable_directory_raises(tmp_path: Path) -> None:
     target = tmp_path / "readonly"
     target.mkdir()
     target.chmod(stat.S_IRUSR | stat.S_IXUSR)
-    annotations = parse_kindle_export(str(FIXTURE))
+    annotations = _load_annotations_from_parse()
     try:
         with pytest.raises(OSError):
-            save_annotations(annotations[:1], str(target))
+            save_annotations(annotations=annotations[:1], directory=str(target))
     finally:
         target.chmod(stat.S_IRWXU)
+
+
+# --- save_annotations: file_path parameter ---
+
+
+def test_save_from_file_path(tmp_path: Path) -> None:
+    # Create a JSON file with annotations
+    annotations = _load_annotations_from_parse()
+    for a in annotations:
+        a["title"] = "Title From File"
+    json_file = tmp_path / "annotations.json"
+    json_file.write_text(json.dumps(annotations), encoding="utf-8")
+    paths = save_annotations(file_path=str(json_file), directory=str(tmp_path / "out"))
+    assert len(paths) == 4
+    assert all(Path(p).exists() for p in paths)
+
+
+def test_save_backward_compat_annotations_param(tmp_path: Path) -> None:
+    annotations = _load_annotations_from_parse()
+    paths = save_annotations(annotations=annotations[:1], directory=str(tmp_path / "out"))
+    assert len(paths) == 1
+    assert Path(paths[0]).exists()
+
+
+def test_save_both_params_raises(tmp_path: Path) -> None:
+    annotations = _load_annotations_from_parse()
+    with pytest.raises(ValueError, match="exactly one"):
+        save_annotations(
+            annotations=annotations,
+            file_path="/tmp/some.json",
+            directory=str(tmp_path / "out"),
+        )
+
+
+def test_save_neither_param_raises(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="exactly one"):
+        save_annotations(directory=str(tmp_path / "out"))
+
+
+def test_save_file_path_not_found(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        save_annotations(
+            file_path="/tmp/nonexistent_annotations.json",
+            directory=str(tmp_path / "out"),
+        )
 
 
 # --- parse_md_annotations_dir tool ---
@@ -338,3 +434,19 @@ def test_kindle_import_contains_title_instructions() -> None:
     text = result[0].content.text
     assert "title" in text.lower()
     assert "10" in text
+
+
+def test_kindle_import_references_file_path_workflow() -> None:
+    result = kindle_import_annotations(
+        file_path="/tmp/exports/test.html"
+    )
+    text = result[0].content.text
+    assert "file_path" in text
+
+
+def test_kindle_import_contains_batch_guidance() -> None:
+    result = kindle_import_annotations(
+        file_path="/tmp/exports/test.html"
+    )
+    text = result[0].content.text
+    assert "30" in text

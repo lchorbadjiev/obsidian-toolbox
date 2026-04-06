@@ -1,11 +1,14 @@
 """MCP server for obsidian-toolbox.
 
-Exposes three tools and one prompt:
-- parse_kindle_export: parse a Kindle HTML notebook export
+Exposes tools and prompts for annotation management:
+- parse_kindle_export: parse a Kindle HTML notebook export to a temp JSON file
 - parse_md_annotations_dir: read a directory of annotation markdown files
-- save_annotations: write annotations as individual markdown files
+- save_annotations: write annotations as markdown files (from JSON file or inline)
 - generate_book_index: prompt to generate a book index markdown file
+- kindle_import_annotations: prompt to orchestrate Kindle import workflow
 """
+import json
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -22,10 +25,10 @@ from otb.zotero_parser import parse_zotero_annotations
 mcp = FastMCP(
     "obsidian-toolbox",
     instructions=(
-        "Use parse_kindle_export to get annotations from a Kindle export file. "
-        "The returned annotations have no titles. Before calling save_annotations, "
-        "generate a concise title (under 10 words) for each annotation using the "
-        "annotation text, then include it in the 'title' field when saving."
+        "Use parse_kindle_export to parse a Kindle export file. It writes annotations "
+        "to a temp JSON file and returns a summary (file_path, count, book_title, "
+        "author, chapters). Read the temp file in batches of ~30 to generate titles, "
+        "then call save_annotations(file_path=..., directory=...) to write markdown files."
     ),
 )
 
@@ -59,21 +62,46 @@ def _dict_to_annotation(d: dict[str, Any]) -> Annotation:
 
 @mcp.tool(
     description=(
-        "Parse a Kindle HTML notebook export and return all annotations as a list. "
-        "Each annotation has: book_title, author, chapter, page, location, text, "
-        "color, number, and title (always empty — generate titles yourself before "
-        "saving). "
+        "Parse a Kindle HTML notebook export, write annotations to a temp JSON file, "
+        "and return a summary. The summary contains: file_path (path to the temp JSON "
+        "file), count (number of annotations), book_title, author, chapters (list of "
+        "unique chapter names). Annotation titles are always empty — generate titles "
+        "by reading the temp file, then pass file_path to save_annotations. "
         "Path should be absolute for reliability. "
         "Raises FileNotFoundError if the path does not exist."
     )
 )
-def parse_kindle_export(path: str) -> list[dict[str, Any]]:
-    """Return annotations from a Kindle HTML export. Titles are always empty."""
+def parse_kindle_export(path: str) -> dict[str, Any]:
+    """Write annotations to temp JSON file; return summary with file path."""
     resolved = Path(path).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"File not found: {path}")
     annotations = parse_notebook(resolved, generate_title=False)
-    return [_annotation_to_dict(a) for a in annotations]
+    dicts = [_annotation_to_dict(a) for a in annotations]
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as tmp:
+        json.dump(dicts, tmp, ensure_ascii=False)
+        tmp_path = tmp.name
+
+    chapters: list[str] = []
+    seen: set[str] = set()
+    for a in annotations:
+        if a.chapter and a.chapter not in seen:
+            chapters.append(a.chapter)
+            seen.add(a.chapter)
+
+    book_title = annotations[0].book.title if annotations else ""
+    author = annotations[0].book.author if annotations else ""
+
+    return {
+        "file_path": tmp_path,
+        "count": len(dicts),
+        "book_title": book_title,
+        "author": author,
+        "chapters": chapters,
+    }
 
 
 @mcp.tool(
@@ -110,15 +138,40 @@ def parse_md_annotations_dir(
 
 @mcp.tool(
     description=(
-        "Save a list of annotations as individual markdown files in the given directory. "
+        "Save annotations as individual markdown files in the given directory. "
         "The directory is created if it does not exist. "
+        "Provide EITHER file_path (path to a JSON file of annotation dicts) OR "
+        "annotations (inline list of annotation dicts) — not both. "
         "Each annotation dict must have: book_title, author, chapter, page, location, "
         "text, number. Optional fields: title (str), color (str or null). "
-        "Returns the list of file paths written."
+        "Returns the list of file paths written. "
+        "Raises ValueError if both or neither of file_path/annotations are provided. "
+        "Raises FileNotFoundError if file_path does not exist."
     )
 )
-def save_annotations(annotations: list[dict[str, Any]], directory: str) -> list[str]:
-    """Write each annotation to a markdown file; return the paths created."""
+def save_annotations(
+    directory: str,
+    annotations: list[dict[str, Any]] | None = None,
+    file_path: str | None = None,
+) -> list[str]:
+    """Write annotations to markdown files from inline list or JSON file."""
+    if annotations is not None and file_path is not None:
+        raise ValueError(
+            "Provide exactly one of 'annotations' or 'file_path', not both."
+        )
+    if annotations is None and file_path is None:
+        raise ValueError(
+            "Provide exactly one of 'annotations' or 'file_path'."
+        )
+
+    if file_path is not None:
+        resolved_file = Path(file_path).expanduser().resolve()
+        if not resolved_file.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+        with open(resolved_file, encoding="utf-8") as f:
+            annotations = json.load(f)
+
+    assert annotations is not None  # for type narrowing
     target = Path(directory).expanduser().resolve()
     objects = [_dict_to_annotation(d) for d in annotations]
     paths = write_annotations(objects, target)
@@ -285,8 +338,8 @@ def parse_zotero_export(path: str) -> list[dict[str, Any]]:
 @mcp.prompt(
     description=(
         "Import Kindle annotations from an HTML export file. "
-        "Orchestrates: parse annotations, generate titles using a "
-        "lightweight AI model, and save as individual markdown files. "
+        "Orchestrates: parse to temp file, generate titles in batches "
+        "of ~30 using subagents, and save from the temp file. "
         "Returns step-by-step instructions for the MCP client to execute."
     )
 )
@@ -304,25 +357,28 @@ def kindle_import_annotations(
         "## Step 1: Parse the Kindle export\n"
         "\n"
         f'Call `parse_kindle_export(path="{file_path}")`.\n'
-        "This returns a list of annotation dicts, each with "
-        "an empty `title` field.\n"
+        "This returns a summary dict with: `file_path` (path to a "
+        "temp JSON file containing all annotations), `count`, "
+        "`book_title`, `author`, and `chapters`.\n"
         "\n"
         "## Step 2: Generate titles\n"
         "\n"
-        "For each annotation in the list, generate a concise "
-        "title (under 10 words) from the annotation `text` "
-        "field. Use a lightweight model (e.g. Haiku) as a "
-        "subagent for speed. Set the `title` field on each "
-        "annotation dict.\n"
+        "Read the temp JSON file at the returned `file_path` in "
+        "batches of ~30 annotations. For each batch, use a "
+        "lightweight model (e.g. Haiku) as a subagent to generate "
+        "a concise title (under 10 words) from each annotation's "
+        "`text` field. Write the updated annotations (with titles) "
+        "back to the same temp file.\n"
         "\n"
-        "If title generation fails for any annotation, fall "
-        "back to the first 7 words of the text, title-cased.\n"
+        "If title generation fails for any annotation, leave its "
+        "title empty — it will be saved without a title.\n"
         "\n"
         "## Step 3: Save annotations\n"
         "\n"
-        "Call `save_annotations(annotations=<the list with "
-        f'titles>, directory="{output_dir}")`.\n'
-        "This writes one markdown file per annotation.\n"
+        "Call `save_annotations(file_path=<the temp file path>, "
+        f'directory="{output_dir}")`.\n'
+        "This reads the temp file and writes one markdown file "
+        "per annotation.\n"
         "\n"
         "## Expected result\n"
         "\n"

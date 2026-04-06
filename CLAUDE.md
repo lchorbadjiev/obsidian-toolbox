@@ -84,6 +84,8 @@ manually run `git add .beads/ && git commit`.
 --- END AGENTS.MD CONTENT ---
 
 ## Active Technologies
+- Python 3.12+ + mcp (FastMCP), click, beautifulsoup4 (009-kindle-import-file-passing)
+- Filesystem (temp JSON files, markdown output) (009-kindle-import-file-passing)
 
 - Python 3.12+ + mcp (FastMCP) — no new deps
   (008-kindle-import-prompt)
