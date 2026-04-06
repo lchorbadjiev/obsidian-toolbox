@@ -4,7 +4,7 @@ author: Stephen Hawking
 chapter: "1   Our Picture of the Universe"
 page: 3
 location: 87
-type: highlight
+type: annotation
 number: 2
 ---
 

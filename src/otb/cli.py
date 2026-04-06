@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from otb.md_parser import parse_highlight_dir
+from otb.md_parser import parse_annotation_dir
 from otb.mcp_server import _build_index_prompt, run as mcp_run
 from otb.parser import parse_notebook
 
@@ -27,26 +27,26 @@ def mcp_serve() -> None:
 
 @main.group()
 def md() -> None:
-    """Commands for markdown highlight files."""
+    """Commands for annotation markdown files."""
 
 
 @md.command("count")
 @click.argument("path", type=click.Path(exists=True, file_okay=False, path_type=Path))
 def md_count(path: Path) -> None:
-    """Print the number of highlights in a directory of markdown highlight files."""
-    click.echo(len(parse_highlight_dir(path)))
+    """Print the number of annotations in a directory of annotation markdown files."""
+    click.echo(len(parse_annotation_dir(path)))
 
 
 @md.command("index-prompt")
 @click.argument("path", type=click.Path(exists=True, file_okay=False, path_type=Path))
 def md_index_prompt(path: Path) -> None:
-    """Print the book index generation prompt for a highlights directory."""
+    """Print the book index generation prompt for an annotations directory."""
     click.echo(_build_index_prompt(str(path)))
 
 
 @kindle.command("count")
 @click.argument("path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 def kindle_count(path: Path) -> None:
-    """Print the number of highlights in a Kindle notebook HTML export."""
-    highlights = parse_notebook(path)
-    click.echo(len(highlights))
+    """Print the number of annotations in a Kindle notebook HTML export."""
+    annotations = parse_notebook(path)
+    click.echo(len(annotations))

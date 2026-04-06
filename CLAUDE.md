@@ -20,16 +20,16 @@ uv run pylint src/ tests/      # lint (target: 10/10)
 
 ### Parsers
 
-Both parsers produce `list[Highlight]` using shared dataclasses defined in `parser.py`.
+Both parsers produce `list[Annotation]` using shared dataclasses defined in `parser.py`.
 
-- **`parser.py`** — parses Kindle notebook HTML exports (`parse_notebook`). Defines `Book` and `Highlight` dataclasses shared across all parsers. Author names are normalized from "Last, First" → "First Last".
-- **`md_parser.py`** — parses highlight markdown files with YAML-like frontmatter (`parse_highlight_md`, `parse_highlight_dir`). Uses regex only; no yaml dependency.
+- **`parser.py`** — parses Kindle notebook HTML exports (`parse_notebook`). Defines `Book` and `Annotation` dataclasses shared across all parsers. Author names are normalized from "Last, First" → "First Last".
+- **`md_parser.py`** — parses annotation markdown files with YAML-like frontmatter (`parse_annotation_md`, `parse_annotation_dir`). Uses regex only; no yaml dependency.
 
 ### Dataclasses (`parser.py`)
 
 ```python
 Book(title, author)
-Highlight(book, chapter, page, location, text, title="", color=None)
+Annotation(book, chapter, page, location, text, title="", color=None)
 ```
 
 `color` is `str | None` — present from HTML parser, always `None` from markdown parser.  
@@ -37,7 +37,7 @@ Highlight(book, chapter, page, location, text, title="", color=None)
 
 ### Tests
 
-Fixtures live in `tests/fixtures/`: one HTML file and `tests/fixtures/highlights/` for markdown files. All test files suppress `missing-function-docstring` with a file-level pylint comment; `redefined-outer-name` is suppressed globally in `pyproject.toml` for the pytest fixture pattern.
+Fixtures live in `tests/fixtures/`: one HTML file and `tests/fixtures/annotations/` for markdown files. All test files suppress `missing-function-docstring` with a file-level pylint comment; `redefined-outer-name` is suppressed globally in `pyproject.toml` for the pytest fixture pattern.
 
 
 --- BEGIN AGENTS.MD CONTENT ---
