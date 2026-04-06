@@ -96,11 +96,12 @@ def zotero() -> None:
 @zotero.command("parse")
 @click.argument("input_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.argument("output_dir", type=click.Path(file_okay=False, path_type=Path))
-def zotero_parse(input_dir: Path, output_dir: Path) -> None:
+@click.option("--verbose", is_flag=True, help="Print each word split to stderr.")
+def zotero_parse(input_dir: Path, output_dir: Path, verbose: bool) -> None:
     """Parse Zotero annotations and write individual markdown files."""
     try:
-        annotations = parse_zotero_annotations(input_dir)
-    except FileNotFoundError as exc:
+        annotations = parse_zotero_annotations(input_dir, verbose=verbose)
+    except (FileNotFoundError, RuntimeError) as exc:
         click.echo(str(exc), err=True)
         sys.exit(1)
     write_annotations(annotations, output_dir)

@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from otb.parser import Annotation, Book, _title_from_text
+from otb.word_fixer import check_aspell_available, fix_concatenated_words
 
 _ROMAN_MAP = {
     "m": 1000, "cm": 900, "d": 500, "cd": 400,
@@ -61,21 +62,26 @@ _ANNOTATION_RE = re.compile(
 )
 
 
-def parse_zotero_annotations(directory: Path) -> list[Annotation]:
+def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-build pipeline
+    directory: Path, verbose: bool = False,
+) -> list[Annotation]:
     """Parse Zotero annotation exports from a directory.
 
     The directory must contain book.txt and Annotations.md.
     Returns a list of Annotation objects with sequential numbering.
 
     Raises FileNotFoundError if book.txt or Annotations.md is missing.
+    Raises RuntimeError if aspell is not installed.
     """
+    check_aspell_available()
     book = parse_book_metadata(directory / "book.txt")
     ann_path = directory / "Annotations.md"
     if not ann_path.exists():
         raise FileNotFoundError(f"File not found: {ann_path}")
     text = ann_path.read_text(encoding="utf-8")
 
-    annotations: list[Annotation] = []
+    # Phase 1: extract raw annotation texts and page numbers
+    raw_entries: list[tuple[str, int]] = []
     for line in text.splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#") or stripped.startswith("("):
@@ -93,22 +99,36 @@ def parse_zotero_annotations(directory: Path) -> list[Annotation]:
                     file=sys.stderr,
                 )
                 continue
-            annotations.append(
-                Annotation(
-                    book=book,
-                    chapter="",
-                    page=page,
-                    location=page,
-                    text=ann_text,
-                    title=_title_from_text(ann_text),
-                    color=None,
-                )
-            )
+            raw_entries.append((ann_text, page))
         else:
             print(
                 f"Warning: skipping unparseable line: {stripped[:60]}...",
                 file=sys.stderr,
             )
+
+    # Phase 2: fix concatenated words across all texts
+    raw_texts = [t for t, _ in raw_entries]
+    fixed_texts, fix_count = fix_concatenated_words(raw_texts, verbose=verbose)
+    if fix_count:
+        print(
+            f"Fixed {fix_count} concatenated words.",
+            file=sys.stderr,
+        )
+
+    # Phase 3: build Annotation objects from fixed texts
+    annotations: list[Annotation] = []
+    for (_, page), fixed_text in zip(raw_entries, fixed_texts):
+        annotations.append(
+            Annotation(
+                book=book,
+                chapter="",
+                page=page,
+                location=page,
+                text=fixed_text,
+                title=_title_from_text(fixed_text),
+                color=None,
+            )
+        )
 
     for i, a in enumerate(annotations, start=1):
         a.number = i

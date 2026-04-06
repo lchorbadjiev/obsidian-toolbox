@@ -73,6 +73,7 @@ After `br sync --flush-only`, you must manually run
 - N/A (read-only from source; writes go to Anki via AnkiConnect) (005-anki-cards-export)
 - Python 3.12+ + click, mcp (FastMCP) -- already (006-parse-zotero-annotations)
 - Filesystem (reads Zotero exports, writes markdown (006-parse-zotero-annotations)
+- Python 3.12+ + click, mcp (FastMCP) + aspell (system command-line tool, (007-fix-zotero-word-concat)
 
 ## Recent Changes
 - 002-parse-md-highlights: Added Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps

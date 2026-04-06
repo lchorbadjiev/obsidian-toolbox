@@ -1,6 +1,7 @@
 """Tests for the Zotero annotation parser."""
 # pylint: disable=missing-function-docstring
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -155,3 +156,47 @@ def test_unparseable_line_skipped(tmp_path: Path) -> None:
     assert len(result) == 2
     assert result[0].text == "Good text"
     assert result[1].text == "More text"
+
+
+# ---------------------------------------------------------------------------
+# T010: word splitting in parsed output
+# ---------------------------------------------------------------------------
+
+
+def test_word_splitting_applied(annotations: list[Annotation]) -> None:
+    # Annotation 67 (0-indexed) originally has "SoftwareWithout"
+    texts = [a.text for a in annotations]
+    joined = " ".join(texts)
+    assert "SoftwareWithout" not in joined
+    assert "Software Without" in joined
+
+
+# ---------------------------------------------------------------------------
+# T011: annotation count preserved after splitting
+# ---------------------------------------------------------------------------
+
+
+def test_annotation_count_with_splitting(annotations: list[Annotation]) -> None:
+    assert len(annotations) == 306
+
+
+# ---------------------------------------------------------------------------
+# T012: fix count summary on stderr
+# ---------------------------------------------------------------------------
+
+
+def test_fix_count_summary(capfd: pytest.CaptureFixture[str]) -> None:
+    parse_zotero_annotations(FIXTURE_DIR)
+    captured = capfd.readouterr()
+    assert "Fixed" in captured.err
+
+
+# ---------------------------------------------------------------------------
+# T013: aspell not found raises RuntimeError
+# ---------------------------------------------------------------------------
+
+
+def test_aspell_not_found_raises() -> None:
+    with patch("otb.word_fixer.shutil.which", return_value=None):
+        with pytest.raises(RuntimeError, match="aspell"):
+            parse_zotero_annotations(FIXTURE_DIR)

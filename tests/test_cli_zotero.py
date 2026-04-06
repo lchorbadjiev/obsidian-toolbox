@@ -1,6 +1,7 @@
 """Tests for the Zotero CLI commands."""
 # pylint: disable=missing-function-docstring
 from pathlib import Path
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
@@ -57,4 +58,47 @@ def test_zotero_parse_missing_book_txt(tmp_path: Path) -> None:
         main, ["zotero", "parse", str(input_dir), str(out_dir)]
     )
     assert result.exit_code == 1
-    assert result.output.strip()  # error message on stderr
+
+
+# ---------------------------------------------------------------------------
+# T014: CLI prints fix count summary on stderr
+# ---------------------------------------------------------------------------
+
+
+def test_zotero_parse_fix_count_summary(tmp_path: Path) -> None:
+    out_dir = tmp_path / "output"
+    result = CliRunner().invoke(
+        main, ["zotero", "parse", str(FIXTURE_DIR), str(out_dir)]
+    )
+    assert result.exit_code == 0
+    assert "Fixed" in result.output
+
+
+# ---------------------------------------------------------------------------
+# T015: CLI aspell not found
+# ---------------------------------------------------------------------------
+
+
+def test_zotero_parse_aspell_not_found(tmp_path: Path) -> None:
+    out_dir = tmp_path / "output"
+    with patch("otb.word_fixer.shutil.which", return_value=None):
+        result = CliRunner().invoke(
+            main, ["zotero", "parse", str(FIXTURE_DIR), str(out_dir)]
+        )
+    assert result.exit_code == 1
+    assert "aspell" in result.output
+
+
+# ---------------------------------------------------------------------------
+# T020: CLI --verbose flag
+# ---------------------------------------------------------------------------
+
+
+def test_zotero_parse_verbose(tmp_path: Path) -> None:
+    out_dir = tmp_path / "output"
+    result = CliRunner().invoke(
+        main,
+        ["zotero", "parse", "--verbose", str(FIXTURE_DIR), str(out_dir)],
+    )
+    assert result.exit_code == 0
+    assert "\u2192" in result.output  # arrow in verbose split reports
