@@ -1,7 +1,8 @@
 # Obsidian Toolbox
 
 A CLI tool and MCP server for converting Kindle notebook exports into
-Obsidian-ready markdown annotation files and book index documents.
+Obsidian-ready markdown annotation files, book index documents, and
+Anki flashcard decks.
 
 ## Installation
 
@@ -39,8 +40,9 @@ the agent:
 | Name | Type | Description |
 |------|------|-------------|
 | `parse_kindle_export` | tool | Parse a Kindle HTML export into annotations |
-| `save_highlights` | tool | Save annotations as individual `.md` files |
-| `parse_md_highlights_dir` | tool | Read a directory of annotation `.md` files |
+| `save_annotations` | tool | Save annotations as individual `.md` files |
+| `parse_md_annotations_dir` | tool | Read a directory of annotation `.md` files |
+| `anki_export` | tool | Export annotation `.md` files to an Anki deck |
 | `generate_book_index` | prompt | Generate a book index from an annotations dir |
 
 ## Workflow: Kindle Export → Markdown Annotations → Book Index
@@ -61,7 +63,7 @@ Ask Claude (with the MCP server active):
 Claude will:
 1. Call `parse_kindle_export` to read the HTML file.
 2. Generate a concise title (under 10 words) for each annotation.
-3. Call `save_highlights` to write one `.md` file per annotation.
+3. Call `save_annotations` to write one `.md` file per annotation.
 
 Each output file follows this format:
 
@@ -72,7 +74,7 @@ author: Stephen Hawking
 chapter: "1   Our Picture of the Universe"
 page: 1
 location: 42
-type: highlight
+type: annotation
 number: 1
 ---
 
@@ -126,6 +128,52 @@ and the universe for a general audience...
 All wikilinks point to the individual annotation files, making the
 index fully navigable in Obsidian.
 
+## Workflow: Annotation Files → Anki Flashcards
+
+### Prerequisites
+
+1. Anki desktop app is open.
+2. The [AnkiConnect](https://ankiweb.net/shared/info/2055492823) add-on
+   is installed (add-on ID `2055492823`).
+
+### Export to Anki
+
+Run the command pointing at a directory of annotation markdown files:
+
+```bash
+otb anki export ~/notes/a-brief-history/notes/
+```
+
+Each annotation becomes one **Basic** card:
+
+- **Front**: chapter name + annotation title
+- **Back**: full annotation text
+
+The target deck is named after the book title by default. On success,
+each markdown file is updated with an `anki_id` frontmatter field
+containing the Anki note ID, so re-running the command skips
+already-exported annotations.
+
+```bash
+# Send to a custom or nested deck
+otb anki export ~/notes/a-brief-history/notes/ --deck "Books::Non-Fiction"
+
+# Use a non-default AnkiConnect port
+otb anki export ~/notes/a-brief-history/notes/ --anki-url http://localhost:8080
+```
+
+Output:
+
+```
+Created: 42  Skipped: 0  Failed: 0
+```
+
+Re-running after adding new annotations only exports the new ones:
+
+```
+Created: 3  Skipped: 42  Failed: 0
+```
+
 ## CLI Reference
 
 ```bash
@@ -137,6 +185,11 @@ otb md count path/to/notes/
 
 # Print the book index generation prompt (inspect or pipe)
 otb md index-prompt path/to/notes/
+
+# Export annotation .md files to an Anki deck
+otb anki export path/to/notes/
+otb anki export path/to/notes/ --deck "Books::Non-Fiction"
+otb anki export path/to/notes/ --anki-url http://localhost:8080
 
 # Start the MCP server manually (stdio transport)
 otb mcp
