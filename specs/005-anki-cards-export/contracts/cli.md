@@ -19,12 +19,13 @@ otb anki export [OPTIONS] PATH
 
 ## Options
 
-| Option       | Type  | Default                       | Description                   |
-|--------------|-------|-------------------------------|-------------------------------|
-| `--deck`     | `str` | Book title from first         | Target Anki deck name.        |
-|              |       | annotation                    | Supports nested decks via     |
-|              |       |                               | `Parent::Child` syntax.       |
-| `--anki-url` | `str` | `http://localhost:8765`       | Base URL for AnkiConnect.     |
+| Option       | Type  | Default              | Description            |
+|--------------|-------|----------------------|------------------------|
+| `--deck`     | `str` | Book title from      | Target Anki deck name. |
+|              |       | first annotation     | Supports nested decks  |
+|              |       |                      | via `::` syntax.       |
+| `--anki-url` | `str` | `http://localhost:`  | Base URL for           |
+|              |       | `8765`               | AnkiConnect.           |
 
 ## Exit Codes
 

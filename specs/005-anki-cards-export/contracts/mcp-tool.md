@@ -22,14 +22,15 @@ anki_export(
 ) -> dict[str, Any]
 ```
 
-| Parameter  | Type  | Required | Default                   | Description                      |
-|------------|-------|----------|---------------------------|----------------------------------|
-| `path`     | `str` | Yes      | —                         | Absolute or relative path to a   |
-|            |       |          |                           | Kindle HTML file or annotation   |
-|            |       |          |                           | markdown directory.              |
-| `deck`     | `str` | No       | `""` (uses book title)    | Target Anki deck name.           |
-|            |       |          |                           | Supports `Parent::Child` syntax. |
-| `anki_url` | `str` | No       | `"http://localhost:8765"` | Base URL for AnkiConnect.        |
+| Parameter  | Type  | Req | Default             | Description        |
+|------------|-------|-----|---------------------|--------------------|
+| `path`     | `str` | Yes | --                  | Path to annotation |
+|            |       |     |                     | markdown directory |
+| `deck`     | `str` | No  | `""` (book title)   | Anki deck name.    |
+|            |       |     |                     | Supports `Parent:` |
+|            |       |     |                     | `::Child` syntax.  |
+| `anki_url` | `str` | No  | `"http://localhost:` | AnkiConnect URL.  |
+|            |       |     | `8765"`             |                    |
 
 ## Return Value
 

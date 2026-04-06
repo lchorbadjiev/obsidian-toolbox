@@ -1,6 +1,7 @@
 # Specification Quality Checklist: Book Index Generation Prompt
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
+**Purpose**: Validate specification completeness and quality
+before proceeding to planning
 **Created**: 2026-04-05
 **Feature**: [spec.md](../spec.md)
 
@@ -32,4 +33,5 @@
 ## Notes
 
 - Single user story is sufficient; this is a focused, single-primitive feature
-- Assumes highlights follow the convention established by `save_highlights` (Feature 001)
+- Assumes highlights follow the convention established by
+  `save_highlights` (Feature 001)

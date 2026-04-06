@@ -1,14 +1,21 @@
 # Obsidian Toolbox
 
-A CLI tool and MCP server for converting Kindle notebook exports into
-Obsidian-ready markdown annotation files, book index documents, and
-Anki flashcard decks.
+A CLI tool and MCP server for converting Kindle and Zotero annotation
+exports into Obsidian-ready markdown annotation files, book index
+documents, and Anki flashcard decks.
 
 ## Installation
 
-Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.12+, [uv](https://docs.astral.sh/uv/), and
+[aspell](https://aspell.net/) (for Zotero word-splitting).
 
 ```bash
+# macOS
+brew install aspell
+
+# Ubuntu/Debian
+# sudo apt-get install aspell aspell-en
+
 git clone <repo>
 cd obsidian-toolbox
 uv sync
@@ -41,6 +48,7 @@ the agent:
 | Name                       | Type   | Description                           |
 | -------------------------- | ------ | ------------------------------------- |
 | `parse_kindle_export`      | tool   | Parse a Kindle HTML export            |
+| `parse_zotero_export`      | tool   | Parse a Zotero annotation export      |
 | `save_annotations`         | tool   | Save annotations as `.md` files       |
 | `parse_md_annotations_dir` | tool   | Read a directory of annotation files  |
 | `anki_export`              | tool   | Export annotations to an Anki deck    |
@@ -131,6 +139,35 @@ and the universe for a general audience...
 All wikilinks point to the individual annotation files, making the
 index fully navigable in Obsidian.
 
+## Workflow: Zotero Export → Markdown Annotations
+
+### Export from Zotero
+
+In Calibre's Zotero integration (or Zotero directly), export your
+annotations for a book. This produces a directory with two files:
+
+- `Annotations.md` — the annotation text with page references
+- `book.txt` — book metadata (title, author, etc.)
+
+### Parse and save Zotero annotations
+
+```bash
+otb zotero parse ~/Downloads/zotero-export/ ~/notes/refactoring/notes/
+```
+
+The parser automatically fixes concatenated words (a common issue in
+Zotero's PDF text extraction where spaces get dropped, e.g.
+"SoftwareWithout" → "Software Without") using aspell.
+
+Use `--verbose` to see each word fix:
+
+```bash
+otb zotero parse --verbose ~/Downloads/zotero-export/ ~/notes/refactoring/notes/
+```
+
+Output files follow the same format as Kindle annotations and are
+fully compatible with the book index and Anki export workflows below.
+
 ## Workflow: Annotation Files → Anki Flashcards
 
 ### Prerequisites
@@ -188,6 +225,10 @@ otb md count path/to/notes/
 
 # Print the book index generation prompt (inspect or pipe)
 otb md index-prompt path/to/notes/
+
+# Parse Zotero annotations (auto-fixes concatenated words)
+otb zotero parse path/to/zotero-export/ path/to/output/
+otb zotero parse --verbose path/to/zotero-export/ path/to/output/
 
 # Export annotation .md files to an Anki deck
 otb anki export path/to/notes/

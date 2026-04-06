@@ -1,12 +1,13 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.3.0 → 1.4.0
+Version change: 1.3.0 → 1.4.1
 
 Modified principles:
   VII. Document Formatting — Replaced markdownlint-cli (npx) with
        pymarkdownlnt (Python dev dependency). Added `pymarkdownlnt fix`
-       for autofixing easy formatting issues.
+       for autofixing. Updated invocation to use `scan -r .` for
+       recursive scanning and `fix -r .` for recursive autofixing.
 
 Modified sections:
   Technology Stack — Updated markdown linting tool reference.
@@ -138,15 +139,17 @@ This applies to every `.md` file: README, specs, plans, tasks,
 research notes, quickstart guides, data models, and contract
 definitions.
 
-- Run `pymarkdownlnt scan "**/*.md"` from the repo root to check
-  all files at once, or target a single file as needed.
-- If a rule conflicts with a legitimate formatting need (e.g. a long
-  URL that cannot be wrapped), disable the specific rule inline with
-  a `<!-- pyml disable-next-line md0XX-->` comment and add a
-  one-line justification comment immediately above it.
+- Run `pymarkdownlnt scan -r --respect-gitignore .` from the repo root to check all
+  files recursively (respects `.pymarkdown.json` config).
+- To scan a single file: `pymarkdownlnt scan path/to/file.md`
+- To autofix: `pymarkdownlnt fix -r --respect-gitignore .` or
+  `pymarkdownlnt fix path/to/file.md`
+- If a rule conflicts with a legitimate formatting need (e.g. a
+  long URL that cannot be wrapped), disable the specific rule
+  inline with a `<!-- pyml disable-next-line md0XX-->` comment
+  and add a one-line justification comment immediately above it.
 - Project-wide rule overrides MUST be recorded in
-  `.pymarkdown.json` at the repo root with a comment explaining
-  the rationale.
+  `.pymarkdown.json` at the repo root.
 
 **Rationale**: Consistent line width makes diffs readable, enables
 side-by-side comparison in terminals and code review tools, and ensures
@@ -172,8 +175,8 @@ or a MAJOR amendment if a listed tool is removed or replaced.
 ## Development Workflow
 
 - **Before committing**: `uv run pytest` AND `uv run mypy src/ tests/` AND
-  `uv run pylint src/ tests/` AND `pymarkdownlnt scan "**/*.md"` MUST
-  all pass cleanly.
+  `uv run pylint src/ tests/` AND `pymarkdownlnt scan -r --respect-gitignore .` MUST all
+  pass cleanly.
 - **New parser**: add fixture → write failing test → implement → verify green.
 - **New CLI command**: add Click command → wire to parser or service function → add
   integration test covering the command output.
@@ -210,4 +213,4 @@ the Complexity Tracking table.
 
 Use `CLAUDE.md` for runtime development guidance (commands, architecture, file layout).
 
-**Version**: 1.4.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-06
+**Version**: 1.4.1 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-06

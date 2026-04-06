@@ -18,8 +18,7 @@ to existing files.
 
 ---
 
-## Phase 2: User Story 1 - Generate Book Index via MCP Prompt
-## (Priority: P1) 🎯 MVP
+## Phase 2: US1 - Book Index Prompt (P1) MVP
 
 **Goal**: LLM agent calls `generate_book_index` with a highlights
 directory and receives a `UserMessage` containing all highlight data

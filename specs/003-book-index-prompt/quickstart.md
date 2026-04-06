@@ -2,8 +2,10 @@
 
 ## Scenario: Generate a book index from saved highlights
 
-**Precondition**: A directory of highlight markdown files saved by `save_highlights`, e.g.:
-```
+**Precondition**: A directory of highlight markdown files
+saved by `save_highlights`, e.g.:
+
+```text
 ~/notes/invention-of-science/
 ├── 001 - Human History and the Neolithic Revolution.md
 ├── 002 - Ancient Admiration for Archimedes.md

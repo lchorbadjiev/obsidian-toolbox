@@ -1,6 +1,7 @@
 # Specification Quality Checklist: Parse MD Highlights MCP Tool
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
+**Purpose**: Validate specification completeness and quality
+before proceeding to planning
 **Created**: 2026-04-05
 **Feature**: [spec.md](../spec.md)
 

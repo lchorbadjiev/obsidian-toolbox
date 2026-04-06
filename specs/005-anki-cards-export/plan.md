@@ -33,18 +33,19 @@ still exists in Anki; stale IDs (note deleted) trigger re-creation.
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Principle                  | Status | Notes                                       |
-| -------------------------- | ------ | ------------------------------------------- |
-| I. CLI-First               | PASS   | `otb anki export` added to Click group      |
-| II. Shared Parser Contract | PASS   | Uses existing `Annotation` dataclass and    |
-|                            |        | `parse_annotation_dir`                      |
-| III. Test-First            | PASS   | Tests written before implementation code;   |
-|                            |        | AnkiConnect calls mocked in unit tests      |
-| IV. Type Safety & Lint     | PASS   | mypy + pylint 10/10 enforced                |
-| V. Simplicity / Min Deps   | PASS   | `urllib.request` used; no new packages      |
-| VI. MCP Server             | PASS   | `anki_export` MCP tool delegates to same    |
-|                            |        | service function as CLI                     |
-| VII. Document Formatting   | PASS   | 80-char line wrap enforced in all docs      |
+| Principle                | Status | Notes                                |
+| ------------------------ | ------ | ------------------------------------ |
+| I. CLI-First             | PASS   | `otb anki export` added to Click     |
+|                          |        | group                                |
+| II. Shared Parser        | PASS   | Uses existing `Annotation`           |
+|                          |        | dataclass and `parse_annotation_dir` |
+| III. Test-First          | PASS   | Tests before implementation;         |
+|                          |        | AnkiConnect calls mocked             |
+| IV. Type Safety & Lint   | PASS   | mypy + pylint 10/10 enforced         |
+| V. Simplicity / Min Deps | PASS   | `urllib.request`; no new packages    |
+| VI. MCP Server           | PASS   | `anki_export` MCP tool delegates     |
+|                          |        | to same service function as CLI      |
+| VII. Document Formatting | PASS   | 80-char line wrap enforced           |
 
 ## Project Structure
 

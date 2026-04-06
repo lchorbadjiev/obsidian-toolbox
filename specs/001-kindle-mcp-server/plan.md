@@ -32,8 +32,9 @@ in-process HTML parsing)
 Mandated by Constitution Principle VI and the Technology Stack. Provides FastMCP
 high-level API for defining tools, handling stdio transport, and schema generation.
 
-`anthropic` SDK is **not required** — title generation is handled by the host LLM as
-part of its orchestration workflow (FR-008), not by the server.
+`anthropic` SDK is **not required** — title generation is
+handled by the host LLM as part of its orchestration workflow
+(FR-008), not by the server.
 
 ## Constitution Check
 
@@ -42,8 +43,8 @@ part of its orchestration workflow (FR-008), not by the server.
 | Principle | Status | Notes |
 |-----------|--------|-------|
 | I. CLI-First | ✅ PASS | `otb mcp` command added to `cli.py` |
-| II. Shared Parser Contract | ✅ PASS | Parse tool returns `list[Highlight]`; dataclasses unchanged |
-| III. Test-First | ✅ PASS | Tests written before implementation; MCP tool tests required |
+| II. Shared Parser Contract | ✅ PASS | `list[Highlight]`; unchanged |
+| III. Test-First | ✅ PASS | Tests before impl; MCP tests required |
 | IV. Type Safety & Lint | ✅ PASS | Full mypy + pylint compliance enforced |
 | V. Simplicity | ✅ PASS | Only `mcp` added; no pyyaml; no speculative features |
 | VI. MCP Server | ✅ PASS | This feature implements the principle |

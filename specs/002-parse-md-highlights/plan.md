@@ -15,7 +15,8 @@ Principle I). No new dependencies needed — delegates entirely to the existing
 ## Technical Context
 
 **Language/Version**: Python 3.12+
-**Primary Dependencies**: all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps
+**Primary Dependencies**: all existing (`click`, `beautifulsoup4`,
+`mcp`) — no new deps
 **Storage**: N/A (read-only; no files written)
 **Testing**: pytest; tests use existing markdown fixtures in `tests/fixtures/highlights/`
 **Target Platform**: macOS / Linux (personal tool, stdio process)
@@ -30,11 +31,11 @@ Principle I). No new dependencies needed — delegates entirely to the existing
 
 | Principle | Status | Notes |
 |-----------|--------|-------|
-| I. CLI-First | ✅ PASS | Add `otb md count <path>` command — spec only described MCP but Principle I is mandatory |
-| II. Shared Parser Contract | ✅ PASS | Delegates to `parse_highlight_md`; returns `list[Highlight]` |
+| I. CLI-First | ✅ PASS | Add `otb md count <path>` — Principle I is mandatory |
+| II. Shared Parser Contract | ✅ PASS | Delegates to `parse_highlight_md` |
 | III. Test-First | ✅ PASS | Tests written before implementation |
 | IV. Type Safety & Lint | ✅ PASS | Full mypy + pylint compliance |
-| V. Simplicity | ✅ PASS | Zero new dependencies; per-file error handling done in the tool handler, not a new abstraction |
+| V. Simplicity | ✅ PASS | Zero new deps; per-file errors in handler |
 | VI. MCP Server | ✅ PASS | One new tool added to the existing server |
 
 All gates pass. No Complexity Tracking entries required.

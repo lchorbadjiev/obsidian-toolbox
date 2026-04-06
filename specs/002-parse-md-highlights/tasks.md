@@ -1,7 +1,3 @@
----
-description: "Task list for Parse MD Highlights MCP Tool"
----
-
 # Tasks: Parse MD Highlights MCP Tool
 
 **Input**: Design documents from `/specs/002-parse-md-highlights/`
@@ -27,19 +23,53 @@ aborting the call. `otb md count` provides the same capability from the CLI.
 verify 4 highlights returned in filename order, each with correct fields. Call
 `otb md count tests/fixtures/highlights/` and verify it prints `4`.
 
-- [x] T001 [P] [US1] Write failing tests in `tests/test_mcp_server.py` for `parse_md_highlights_dir`: (a) valid fixtures dir → 4 highlights in filename order with correct fields; (b) non-existent path → error; (c) path is a file not a dir → error; (d) empty directory → empty highlights list; (e) directory with one malformed `.md` file → good highlights returned + parse_errors dict populated for the bad file
-- [x] T002 [P] [US1] Write failing tests in `tests/test_cli_md.py` for `otb md count`: (a) valid dir → prints count to stdout; (b) non-existent path → non-zero exit; (c) empty dir → prints `0`
-- [x] T003 [US1] Add `parse_md_highlights_dir` tool to `src/otb/mcp_server.py`: accepts `directory: str`; iterates sorted `.md` files in that directory (non-recursive); calls `parse_highlight_md` per file in try/except; returns `{"highlights": [...], "parse_errors": {"filename": "error message", ...}}`; raises `NotADirectoryError` if path is a file, `FileNotFoundError` if path does not exist
-- [x] T004 [US1] Add `otb md` Click group and `otb md count` command to `src/otb/cli.py`; `count` accepts a `PATH` argument (`click.Path(exists=True, file_okay=False, path_type=Path)`) and prints the number of successfully parsed highlights via `parse_highlight_dir`
+- [x] T001 [P] [US1] Write failing tests in
+  `tests/test_mcp_server.py` for
+  `parse_md_highlights_dir`: (a) valid fixtures dir
+  → 4 highlights in filename order with correct
+  fields; (b) non-existent path → error; (c) path is
+  a file not a dir → error; (d) empty directory →
+  empty highlights list; (e) directory with one
+  malformed `.md` file → good highlights returned +
+  parse_errors dict populated for the bad file
+- [x] T002 [P] [US1] Write failing tests in
+  `tests/test_cli_md.py` for `otb md count`:
+  (a) valid dir → prints count to stdout;
+  (b) non-existent path → non-zero exit;
+  (c) empty dir → prints `0`
+- [x] T003 [US1] Add `parse_md_highlights_dir` tool
+  to `src/otb/mcp_server.py`: accepts
+  `directory: str`; iterates sorted `.md` files in
+  that directory (non-recursive); calls
+  `parse_highlight_md` per file in try/except;
+  returns
+  `{"highlights": [...], "parse_errors": {...}}`;
+  raises `NotADirectoryError` if path is a file,
+  `FileNotFoundError` if path does not exist
+- [x] T004 [US1] Add `otb md` Click group and
+  `otb md count` command to `src/otb/cli.py`;
+  `count` accepts a `PATH` argument
+  (`click.Path(exists=True, file_okay=False,
+  path_type=Path)`) and prints the number of
+  successfully parsed highlights via
+  `parse_highlight_dir`
 
-**Checkpoint**: US1 complete — both `parse_md_highlights_dir` MCP tool and `otb md count` CLI command work end-to-end.
+**Checkpoint**: US1 complete — both
+`parse_md_highlights_dir` MCP tool and
+`otb md count` CLI command work end-to-end.
 
 ---
 
 ## Phase 3: Polish & Cross-Cutting Concerns
 
-- [x] T005 [P] Run `uv run mypy src/ tests/` and fix all type errors in modified files (`src/otb/mcp_server.py`, `src/otb/cli.py`) and new test files
-- [x] T006 [P] Run `uv run pylint src/ tests/` and fix all issues to reach 10/10; add file-level `missing-function-docstring` disable to `tests/test_cli_md.py`
+- [x] T005 [P] Run `uv run mypy src/ tests/` and
+  fix all type errors in modified files
+  (`src/otb/mcp_server.py`, `src/otb/cli.py`) and
+  new test files
+- [x] T006 [P] Run `uv run pylint src/ tests/` and
+  fix all issues to reach 10/10; add file-level
+  `missing-function-docstring` disable to
+  `tests/test_cli_md.py`
 - [x] T007 Run `uv run pytest` and verify all 41 existing tests plus new tests pass
 
 ---
@@ -75,6 +105,12 @@ T006  # pylint
 
 - `[P]` tasks touch different files — safe to run in parallel
 - Tests MUST fail before implementation (Constitution Principle III)
-- `parse_md_highlights_dir` iterates files itself rather than calling `parse_highlight_dir` so it can catch per-file errors without changing `md_parser.py`
-- `otb md count` uses the existing `parse_highlight_dir` (fail-fast is acceptable for CLI)
-- `tests/test_cli_md.py` is a new test file; use Click's `CliRunner` for command testing
+- `parse_md_highlights_dir` iterates files itself
+  rather than calling `parse_highlight_dir` so it can
+  catch per-file errors without changing
+  `md_parser.py`
+- `otb md count` uses the existing
+  `parse_highlight_dir` (fail-fast is acceptable for
+  CLI)
+- `tests/test_cli_md.py` is a new test file; use
+  Click's `CliRunner` for command testing

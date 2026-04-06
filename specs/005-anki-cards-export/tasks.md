@@ -70,7 +70,8 @@ annotation count, and each `.md` file's frontmatter has `anki_id` set.
 
 ### Tests for User Story 1
 
-> **Write these tests FIRST — confirm they FAIL before any implementation**
+> Write these tests **FIRST** — confirm they FAIL before any
+> implementation.
 
 - [x] T008 [P] [US1] Write failing tests for `build_card(annotation,
   deck_name) -> dict` covering: chapter present, chapter empty, title
@@ -138,7 +139,8 @@ the deck `Test::Books` is created in Anki and all cards land there.
 
 ### Tests for User Story 2
 
-> **Write these tests FIRST — confirm they FAIL before any implementation**
+> Write these tests **FIRST** — confirm they FAIL before any
+> implementation.
 
 - [x] T016 [P] [US2] Write failing CLI test: `otb anki export <dir> --deck
   "Non-Fiction::History"` passes `"Non-Fiction::History"` as the deck
@@ -175,7 +177,8 @@ updated in its markdown file.
 
 ### Tests for User Story 3
 
-> **Write these tests FIRST — confirm they FAIL before any implementation**
+> Write these tests **FIRST** — confirm they FAIL before any
+> implementation.
 
 - [x] T019 [P] [US3] Write failing test for `AnkiClient.notes_info([id1,
   id2])` using mocked `urlopen`: returns list of note dicts for found IDs
@@ -217,7 +220,8 @@ the new tool's input schema, output schema, and error responses are correct.
 
 ### Tests for Phase 6
 
-> **Write these tests FIRST — confirm they FAIL before any implementation**
+> Write these tests **FIRST** — confirm they FAIL before any
+> implementation.
 
 - [x] T024 [P] Write failing MCP tool tests: `anki_export(path, deck="",
   anki_url="http://localhost:8765")` returns `{"created": N, "skipped":
