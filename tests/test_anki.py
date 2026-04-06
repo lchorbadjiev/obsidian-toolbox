@@ -27,7 +27,7 @@ def _annotation(
     return Annotation(
         book=Book(title="My Book", author="Jane Doe"),
         chapter=chapter,
-        page=1,
+        page="1",
         location=100,
         text=text,
         title=title,

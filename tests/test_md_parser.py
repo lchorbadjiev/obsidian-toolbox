@@ -30,9 +30,9 @@ def test_chapter_assignment(annotations: list[Annotation]) -> None:
 
 
 def test_page_and_location(annotations: list[Annotation]) -> None:
-    assert annotations[0].page == 1
+    assert annotations[0].page == "1"
     assert annotations[0].location == 42
-    assert annotations[2].page == 22
+    assert annotations[2].page == "22"
     assert annotations[2].location == 310
 
 
@@ -57,7 +57,7 @@ def test_numbers(annotations: list[Annotation]) -> None:
 def test_single_file() -> None:
     path = FIXTURES_DIR / "001 - A Well-Known Scientist Once Gave a Public Lecture on Astronomy.md"
     a = parse_annotation_md(path)
-    assert a.page == 1
+    assert a.page == "1"
     assert a.location == 42
     assert a.book.author == "Stephen Hawking"
 

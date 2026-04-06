@@ -6,34 +6,6 @@ from pathlib import Path
 from otb.parser import Annotation, Book, _title_from_text
 from otb.word_fixer import check_aspell_available, fix_concatenated_words
 
-_ROMAN_MAP = {
-    "m": 1000, "cm": 900, "d": 500, "cd": 400,
-    "c": 100, "xc": 90, "l": 50, "xl": 40,
-    "x": 10, "ix": 9, "v": 5, "iv": 4, "i": 1,
-}
-_ROMAN_RE = re.compile(r"^[mdclxvi]+$", re.IGNORECASE)
-
-
-def _roman_to_int(s: str) -> int:
-    """Convert a Roman numeral string to an integer."""
-    result = 0
-    s_lower = s.lower()
-    idx = 0
-    for roman, value in _ROMAN_MAP.items():
-        while s_lower[idx:].startswith(roman):
-            result += value
-            idx += len(roman)
-    return result
-
-
-def _parse_page(raw: str) -> int:
-    """Parse a page string as int, handling Roman numerals."""
-    if raw.isdigit():
-        return int(raw)
-    if _ROMAN_RE.match(raw):
-        return _roman_to_int(raw)
-    return int(raw)
-
 
 def parse_book_metadata(path: Path) -> Book:
     """Parse a Zotero book.txt metadata file and return a Book.
@@ -80,8 +52,8 @@ def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-
         raise FileNotFoundError(f"File not found: {ann_path}")
     text = ann_path.read_text(encoding="utf-8")
 
-    # Phase 1: extract raw annotation texts and page numbers
-    raw_entries: list[tuple[str, int]] = []
+    # Phase 1: extract raw annotation texts and page strings
+    raw_entries: list[tuple[str, str]] = []
     for line in text.splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#") or stripped.startswith("("):
@@ -90,16 +62,7 @@ def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-
         if match:
             ann_text = match.group(1)
             page_raw = match.group(2)
-            try:
-                page = _parse_page(page_raw)
-            except ValueError:
-                print(
-                    f"Warning: skipping annotation with unparseable page "
-                    f"'{page_raw}': {ann_text[:40]}...",
-                    file=sys.stderr,
-                )
-                continue
-            raw_entries.append((ann_text, page))
+            raw_entries.append((ann_text, page_raw))
         else:
             print(
                 f"Warning: skipping unparseable line: {stripped[:60]}...",
@@ -123,7 +86,7 @@ def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-
                 book=book,
                 chapter="",
                 page=page,
-                location=page,
+                location=0,
                 text=fixed_text,
                 title=_title_from_text(fixed_text),
                 color=None,

@@ -21,7 +21,7 @@ class Annotation:
 
     book: Book
     chapter: str
-    page: int
+    page: str
     location: int
     text: str
     title: str = ""
@@ -43,9 +43,38 @@ def _title_from_text(text: str) -> str:
 
 
 _NOTE_HEADING_RE = re.compile(
-    r"Highlight\(\s*(\w+)\s*\)\s*-\s*Page\s+(\d+)\s*·\s*Location\s+(\d+)",
+    r"Highlight\(\s*(\w+)\s*\)\s*-\s*(.+?)\s*·\s*Location\s+(\d+)",
     re.IGNORECASE,
 )
+
+def _parse_page_ref(raw: str) -> tuple[str, str]:
+    """Parse a page reference from a noteHeading.
+
+    Handles: 'Page 42', 'Page XVII',
+    'Chapter 5: Title > Page 42', 'Chapter 1: Title'.
+    Returns (page_string, chapter_from_heading).
+    """
+    chapter = ""
+    page_str = ""
+
+    if ">" in raw:
+        # "Chapter 5: Title > Page 42"
+        parts = raw.split(">", 1)
+        chapter = parts[0].strip()
+        page_part = parts[1].strip()
+    elif raw.strip().lower().startswith("chapter"):
+        # "Chapter 1: Title" with no page
+        chapter = raw.strip()
+        page_part = ""
+    else:
+        page_part = raw.strip()
+
+    # Extract the page value from page_part like "Page 42"
+    page_match = re.search(r"Page\s+(\S+)", page_part, re.IGNORECASE)
+    if page_match:
+        page_str = page_match.group(1)
+
+    return page_str, chapter
 
 
 def _parse_annotation(
@@ -57,7 +86,7 @@ def _parse_annotation(
     return Annotation(
         book=book,
         chapter=chapter,
-        page=int(pending["page"]),
+        page=str(pending["page"]),
         location=int(pending["location"]),
         text=text,
         title=_title_from_text(text) if generate_title else "",
@@ -103,9 +132,12 @@ def parse_notebook(  # pylint: disable=too-many-locals  # sequential HTML parsin
             heading_text = div.get_text(strip=True)
             match = _NOTE_HEADING_RE.search(heading_text)
             if match:
+                page, heading_chapter = _parse_page_ref(match.group(2))
+                if heading_chapter:
+                    current_chapter = heading_chapter
                 pending = {
                     "color": match.group(1),
-                    "page": int(match.group(2)),
+                    "page": page,
                     "location": int(match.group(3)),
                 }
             else:

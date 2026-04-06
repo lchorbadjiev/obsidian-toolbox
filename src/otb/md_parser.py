@@ -41,7 +41,7 @@ def parse_annotation_md(path: Path) -> Annotation:
     return Annotation(
         book=book,
         chapter=fm["chapter"],
-        page=int(fm["page"]),
+        page=fm["page"],
         location=int(fm["location"]),
         text=blockquote.group(1),
         title=h1.group(1) if h1 else "",

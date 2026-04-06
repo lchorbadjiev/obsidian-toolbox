@@ -31,9 +31,9 @@ def test_chapter_assignment(annotations: list[Annotation]) -> None:
 
 
 def test_page_and_location(annotations: list[Annotation]) -> None:
-    assert annotations[0].page == 1
+    assert annotations[0].page == "1"
     assert annotations[0].location == 42
-    assert annotations[2].page == 22
+    assert annotations[2].page == "22"
     assert annotations[2].location == 310
 
 
@@ -64,7 +64,7 @@ def test_generate_title_false() -> None:
 
 def test_anki_id_defaults_to_none() -> None:
     a = Annotation(
-        book=Book(title="T", author="A"), chapter="C", page=1, location=1, text="t"
+        book=Book(title="T", author="A"), chapter="C", page="1", location=1, text="t"
     )
     assert a.anki_id is None
 
@@ -73,7 +73,7 @@ def test_anki_id_can_be_set() -> None:
     a = Annotation(
         book=Book(title="T", author="A"),
         chapter="C",
-        page=1,
+        page="1",
         location=1,
         text="t",
         anki_id=1234567890,

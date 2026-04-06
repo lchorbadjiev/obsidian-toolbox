@@ -37,7 +37,7 @@ def test_parse_annotation_fields() -> None:
     assert a["book_title"] == "A Brief History of Time"
     assert a["author"] == "Stephen Hawking"
     assert a["chapter"] == "1   Our Picture of the Universe"
-    assert a["page"] == 1
+    assert a["page"] == "1"
     assert a["location"] == 42
     assert a["text"] == "A well-known scientist once gave a public lecture on astronomy."
     assert a["color"] == "yellow"
@@ -282,8 +282,8 @@ def test_parse_zotero_export_annotation_fields() -> None:
     a = result[0]
     assert a["book_title"] == "Refactoring: Improving the Design of Existing Code"
     assert a["author"] == "Martin Fowler"
-    assert a["page"] == 11
-    assert a["location"] == 11
+    assert a["page"] == "xi"
+    assert a["location"] == 0
     assert a["color"] is None
     assert a["number"] == 1
     assert a["title"]  # non-empty

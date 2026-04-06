@@ -65,8 +65,8 @@ def test_annotation_count(annotations: list[Annotation]) -> None:
 
 def test_first_annotation_fields(annotations: list[Annotation]) -> None:
     a = annotations[0]
-    assert a.page == 11  # roman numeral xi -> 11
-    assert a.location == 11
+    assert a.page == "xi"
+    assert a.location == 0
     assert a.text.startswith("So, what\u2019s the problem?")
     assert a.title == "So, What\u2019S The Problem"
     assert a.number == 1
@@ -137,7 +137,7 @@ def test_short_fragment_annotation(tmp_path: Path) -> None:
     result = parse_zotero_annotations(d)
     assert len(result) == 1
     assert result[0].text == "your design"
-    assert result[0].page == 12
+    assert result[0].page == "12"
 
 
 # ---------------------------------------------------------------------------

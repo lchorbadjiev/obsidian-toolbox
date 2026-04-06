@@ -48,7 +48,7 @@ def _dict_to_annotation(d: dict[str, Any]) -> Annotation:
     return Annotation(
         book=Book(title=str(d["book_title"]), author=str(d["author"])),
         chapter=str(d.get("chapter", "")),
-        page=int(d.get("page", 0)),
+        page=str(d.get("page", "")),
         location=int(d.get("location", 0)),
         text=str(d["text"]),
         title=str(d.get("title", "")),

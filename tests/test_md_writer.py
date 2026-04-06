@@ -16,7 +16,7 @@ def _make_annotation(
     title: str = "Test Title",
     text: str = "Some annotation text.",
     chapter: str = "Chapter One",
-    page: int = 5,
+    page: str = "5",
     location: int = 100,
     color: str | None = "yellow",
 ) -> Annotation:
@@ -97,7 +97,7 @@ def test_round_trip_with_title(tmp_path: Path) -> None:
     assert parsed.book.title == "My Book"
     assert parsed.book.author == "Jane Doe"
     assert parsed.chapter == "Chapter One"
-    assert parsed.page == 5
+    assert parsed.page == "5"
     assert parsed.location == 100
     assert parsed.number == 1
 
@@ -163,9 +163,9 @@ def test_write_anki_id_updates_existing(tmp_path: Path) -> None:
 
 
 def test_write_anki_id_preserves_other_fields(tmp_path: Path) -> None:
-    path = write_annotation(_make_annotation(page=7, location=77), tmp_path)
+    path = write_annotation(_make_annotation(page="7", location=77), tmp_path)
     write_anki_id(path, 42)
     parsed = parse_annotation_md(path)
-    assert parsed.page == 7
+    assert parsed.page == "7"
     assert parsed.location == 77
     assert parsed.anki_id == 42
