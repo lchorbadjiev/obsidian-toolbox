@@ -63,12 +63,13 @@ def _dict_to_annotation(d: dict[str, Any]) -> Annotation:
         "Each annotation has: book_title, author, chapter, page, location, text, "
         "color, number, and title (always empty — generate titles yourself before "
         "saving). "
+        "Path should be absolute for reliability. "
         "Raises FileNotFoundError if the path does not exist."
     )
 )
 def parse_kindle_export(path: str) -> list[dict[str, Any]]:
     """Return annotations from a Kindle HTML export. Titles are always empty."""
-    resolved = Path(path)
+    resolved = Path(path).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"File not found: {path}")
     annotations = parse_notebook(resolved, generate_title=False)
@@ -82,6 +83,7 @@ def parse_kindle_export(path: str) -> list[dict[str, Any]]:
         "Returns {annotations: [...], parse_errors: {filename: error_message}}. "
         "parse_errors is empty when all files parse successfully; malformed files are "
         "skipped and reported there without aborting the call. "
+        "Path should be absolute for reliability. "
         "Raises FileNotFoundError if the path does not exist, "
         "NotADirectoryError if the path is a file."
     )
@@ -90,7 +92,7 @@ def parse_md_annotations_dir(
     directory: str,
 ) -> dict[str, Any]:
     """Return annotations from all .md files in directory; report per-file errors."""
-    resolved = Path(directory)
+    resolved = Path(directory).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"Directory not found: {directory}")
     if not resolved.is_dir():
@@ -117,7 +119,7 @@ def parse_md_annotations_dir(
 )
 def save_annotations(annotations: list[dict[str, Any]], directory: str) -> list[str]:
     """Write each annotation to a markdown file; return the paths created."""
-    target = Path(directory)
+    target = Path(directory).expanduser().resolve()
     objects = [_dict_to_annotation(d) for d in annotations]
     paths = write_annotations(objects, target)
     return [str(p) for p in paths]
@@ -127,7 +129,7 @@ def _build_index_prompt(  # pylint: disable=too-many-locals  # prompt builder co
     directory: str,
 ) -> str:
     """Build the book index generation prompt text from an annotations dir."""
-    resolved = Path(directory)
+    resolved = Path(directory).expanduser().resolve()
     if not resolved.exists():
         return f"Error: directory not found: {directory}"
     if not resolved.is_dir():
@@ -246,7 +248,7 @@ def anki_export(
     anki_url: str = "http://localhost:8765",
 ) -> dict[str, Any]:
     """Export annotation markdown files to Anki; return created/skipped/failed."""
-    resolved = Path(path)
+    resolved = Path(path).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"Path not found: {path}")
     if not resolved.is_dir():
@@ -271,7 +273,7 @@ def anki_export(
 )
 def parse_zotero_export(path: str) -> list[dict[str, Any]]:
     """Return annotations from a Zotero export directory."""
-    resolved = Path(path)
+    resolved = Path(path).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"Directory not found: {path}")
     if not resolved.is_dir():
@@ -292,7 +294,7 @@ def kindle_import_annotations(
     file_path: str,
 ) -> list[UserMessage]:
     """Return instructions to import Kindle annotations."""
-    output_dir = str(Path(file_path).parent / "notes")
+    output_dir = str(Path(file_path).expanduser().resolve().parent / "notes")
     text = (
         "Import Kindle annotations using this workflow:\n"
         "\n"
