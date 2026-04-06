@@ -1,14 +1,16 @@
 # pylint: disable=missing-function-docstring,use-implicit-booleaness-not-comparison
 """Tests for the MCP server tool handlers."""
 import shutil
-from pathlib import Path
-
 import stat
 import sys
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
+from otb.anki import AnkiConnectError, ExportResult
 from otb.mcp_server import (
+    anki_export,
     generate_book_index,
     parse_kindle_export,
     parse_md_annotations_dir,
@@ -219,3 +221,46 @@ def test_generate_book_index_malformed_skipped(tmp_path: Path) -> None:
     text = result[0].content.text
     assert "A Brief History of Time" in text
     assert "000 - bad.md" in text
+
+
+# --- anki_export tool ---
+
+
+def test_anki_export_tool_returns_summary() -> None:
+    with patch(
+        "otb.mcp_server.export_annotations",
+        return_value=ExportResult(created=4, skipped=0, failed=0),
+    ):
+        result = anki_export(str(MD_FIXTURES))
+    assert result == {"created": 4, "skipped": 0, "failed": 0}
+
+
+def test_anki_export_tool_missing_path() -> None:
+    with pytest.raises(FileNotFoundError):
+        anki_export("/tmp/no_such_dir_xyz_abc_mcp")
+
+
+def test_anki_export_tool_file_not_directory(tmp_path: Path) -> None:
+    f = tmp_path / "not_a_dir.md"
+    f.write_text("x", encoding="utf-8")
+    with pytest.raises(NotADirectoryError):
+        anki_export(str(f))
+
+
+def test_anki_export_tool_custom_deck() -> None:
+    with patch(
+        "otb.mcp_server.export_annotations",
+        return_value=ExportResult(created=2, skipped=2, failed=0),
+    ) as mock_exp:
+        anki_export(str(MD_FIXTURES), deck="Books::Test")
+    args = mock_exp.call_args
+    assert args[1].get("deck") == "Books::Test" or args[0][1] == "Books::Test"
+
+
+def test_anki_export_tool_anki_unreachable_raises() -> None:
+    with patch(
+        "otb.mcp_server.export_annotations",
+        side_effect=AnkiConnectError("refused"),
+    ):
+        with pytest.raises(AnkiConnectError):
+            anki_export(str(MD_FIXTURES))

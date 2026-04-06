@@ -27,6 +27,7 @@ class Annotation:
     title: str = ""
     color: str | None = None
     number: int = 0
+    anki_id: int | None = None
 
 
 _SENTENCE_END_RE = re.compile(r"[.!?]")

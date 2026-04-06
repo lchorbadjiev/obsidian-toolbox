@@ -13,7 +13,8 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 from mcp.server.fastmcp.prompts.base import UserMessage
 
-from otb.md_parser import parse_annotation_md
+from otb.anki import export_annotations
+from otb.md_parser import parse_annotation_dir_with_paths, parse_annotation_md
 from otb.md_writer import write_annotations
 from otb.parser import Annotation, Book, parse_notebook
 
@@ -220,6 +221,41 @@ def _build_index_prompt(  # pylint: disable=too-many-locals  # prompt builder co
 def generate_book_index(directory: str) -> list[UserMessage]:
     """Return a prompt for generating a book index from an annotations dir."""
     return [UserMessage(content=_build_index_prompt(directory))]
+
+
+@mcp.tool(
+    description=(
+        "Export book annotations from a directory of annotation markdown files "
+        "to an Anki deck via AnkiConnect. "
+        "Each annotation becomes one Basic card: front = chapter + title, "
+        "back = full annotation text. "
+        "After successful creation, the Anki note ID is written back to each "
+        "annotation file as the anki_id frontmatter field. "
+        "Annotations with anki_id already set are verified against Anki and "
+        "skipped if the note still exists. "
+        "Returns {created, skipped, failed} counts. "
+        "Raises FileNotFoundError if path does not exist, "
+        "NotADirectoryError if path is a file, "
+        "AnkiConnectError if Anki is unreachable."
+    )
+)
+def anki_export(
+    path: str,
+    deck: str = "",
+    anki_url: str = "http://localhost:8765",
+) -> dict[str, Any]:
+    """Export annotation markdown files to Anki; return created/skipped/failed."""
+    resolved = Path(path)
+    if not resolved.exists():
+        raise FileNotFoundError(f"Path not found: {path}")
+    if not resolved.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+    annotated_paths = parse_annotation_dir_with_paths(resolved)
+    if not annotated_paths:
+        return {"created": 0, "skipped": 0, "failed": 0}
+    resolved_deck = deck or annotated_paths[0][1].book.title
+    result = export_annotations(annotated_paths, deck=resolved_deck, anki_url=anki_url)
+    return {"created": result.created, "skipped": result.skipped, "failed": result.failed}
 
 
 def run() -> None:

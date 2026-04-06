@@ -60,3 +60,22 @@ def test_numbers(annotations: list[Annotation]) -> None:
 def test_generate_title_false() -> None:
     results = parse_notebook(FIXTURE, generate_title=False)
     assert all(a.title == "" for a in results)
+
+
+def test_anki_id_defaults_to_none() -> None:
+    a = Annotation(
+        book=Book(title="T", author="A"), chapter="C", page=1, location=1, text="t"
+    )
+    assert a.anki_id is None
+
+
+def test_anki_id_can_be_set() -> None:
+    a = Annotation(
+        book=Book(title="T", author="A"),
+        chapter="C",
+        page=1,
+        location=1,
+        text="t",
+        anki_id=1234567890,
+    )
+    assert a.anki_id == 1234567890

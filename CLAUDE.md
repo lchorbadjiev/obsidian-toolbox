@@ -59,6 +59,8 @@ For full workflow details: `bd prime`
 - Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps (002-parse-md-highlights)
 - N/A (read-only; no files written) (002-parse-md-highlights)
 - Python 3.12+ + `mcp` (FastMCP) — already installed; `click` — already installed (003-book-index-prompt)
+- Python 3.12+ + `click`, `mcp` (FastMCP) — already installed; (005-anki-cards-export)
+- N/A (read-only from source; writes go to Anki via AnkiConnect) (005-anki-cards-export)
 
 ## Recent Changes
 - 002-parse-md-highlights: Added Python 3.12+ + all existing (`click`, `beautifulsoup4`, `mcp`) — no new deps

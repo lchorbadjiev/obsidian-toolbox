@@ -1,9 +1,11 @@
 """CLI entrypoint for obsidian-toolbox."""
+import sys
 from pathlib import Path
 
 import click
 
-from otb.md_parser import parse_annotation_dir
+from otb.anki import AnkiConnectError, export_annotations
+from otb.md_parser import parse_annotation_dir, parse_annotation_dir_with_paths
 from otb.mcp_server import _build_index_prompt, run as mcp_run
 from otb.parser import parse_notebook
 
@@ -50,3 +52,35 @@ def kindle_count(path: Path) -> None:
     """Print the number of annotations in a Kindle notebook HTML export."""
     annotations = parse_notebook(path)
     click.echo(len(annotations))
+
+
+@main.group()
+def anki() -> None:
+    """Commands for Anki flashcard export."""
+
+
+@anki.command("export")
+@click.argument(
+    "path",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+)
+@click.option("--deck", default="", help="Target Anki deck name (default: book title).")
+@click.option(
+    "--anki-url",
+    default="http://localhost:8765",
+    help="AnkiConnect base URL.",
+    show_default=True,
+)
+def anki_export_cmd(path: Path, deck: str, anki_url: str) -> None:
+    """Export annotation markdown files in PATH to an Anki deck."""
+    annotated_paths = parse_annotation_dir_with_paths(path)
+    if not annotated_paths:
+        click.echo("No annotations found.", err=True)
+        sys.exit(1)
+    resolved_deck = deck or annotated_paths[0][1].book.title
+    try:
+        result = export_annotations(annotated_paths, deck=resolved_deck, anki_url=anki_url)
+    except AnkiConnectError as exc:
+        click.echo(str(exc), err=True)
+        sys.exit(1)
+    click.echo(f"Created: {result.created}  Skipped: {result.skipped}  Failed: {result.failed}")
