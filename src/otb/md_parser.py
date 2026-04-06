@@ -43,9 +43,19 @@ def parse_annotation_md(path: Path) -> Annotation:
         text=blockquote.group(1),
         title=h1.group(1) if h1 else "",
         number=int(fm["number"]) if "number" in fm else 0,
+        anki_id=int(fm["anki_id"]) if "anki_id" in fm else None,
     )
 
 
 def parse_annotation_dir(directory: Path) -> list[Annotation]:
     """Parse all annotation markdown files in a directory, sorted by filename."""
     return [parse_annotation_md(p) for p in sorted(directory.glob("*.md"))]
+
+
+def parse_annotation_dir_with_paths(
+    directory: Path,
+) -> list[tuple[Path, Annotation]]:
+    """Parse all annotation markdown files, returning (path, annotation) pairs."""
+    return [
+        (p, parse_annotation_md(p)) for p in sorted(directory.glob("*.md"))
+    ]

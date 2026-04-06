@@ -4,6 +4,8 @@ from pathlib import Path
 
 from otb.parser import Annotation
 
+_ANKI_ID_RE = re.compile(r"^anki_id:.*$", re.MULTILINE)
+
 _UNSAFE_RE = re.compile(r'[/\\:*?"<>|]')
 _FILENAME_MAX = 60
 
@@ -49,6 +51,21 @@ def write_annotation(a: Annotation, directory: Path) -> Path:
     path = directory / filename
     path.write_text(_render(a), encoding="utf-8")
     return path
+
+
+def write_anki_id(path: Path, anki_id: int) -> None:
+    """Insert or replace the anki_id field in an annotation file's frontmatter.
+
+    Raises OSError if the file cannot be written.
+    """
+    content = path.read_text(encoding="utf-8")
+    new_line = f"anki_id: {anki_id}"
+    if _ANKI_ID_RE.search(content):
+        updated = _ANKI_ID_RE.sub(new_line, content)
+    else:
+        # Insert before the closing --- of the frontmatter block
+        updated = content.replace("\n---\n", f"\n{new_line}\n---\n", 1)
+    path.write_text(updated, encoding="utf-8")
 
 
 def write_annotations(annotations: list[Annotation], directory: Path) -> list[Path]:

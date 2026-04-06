@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from otb.md_parser import parse_annotation_md
-from otb.md_writer import write_annotation, write_annotations
+from otb.md_writer import write_annotation, write_annotations, write_anki_id
 from otb.parser import Annotation, Book
 
 
@@ -135,3 +135,37 @@ def test_filename_sanitisation(tmp_path: Path) -> None:
     assert "/" not in path.name
     assert ":" not in path.name
     assert '"' not in path.name
+
+
+def test_write_anki_id_inserts_field(tmp_path: Path) -> None:
+    path = write_annotation(_make_annotation(), tmp_path)
+    write_anki_id(path, 1234567890)
+    assert "anki_id: 1234567890" in path.read_text(encoding="utf-8")
+
+
+def test_write_anki_id_field_in_frontmatter(tmp_path: Path) -> None:
+    path = write_annotation(_make_annotation(), tmp_path)
+    write_anki_id(path, 999)
+    content = path.read_text(encoding="utf-8")
+    # anki_id must appear between the --- delimiters
+    frontmatter_end = content.index("---\n", 4)
+    frontmatter = content[:frontmatter_end]
+    assert "anki_id: 999" in frontmatter
+
+
+def test_write_anki_id_updates_existing(tmp_path: Path) -> None:
+    path = write_annotation(_make_annotation(), tmp_path)
+    write_anki_id(path, 1111)
+    write_anki_id(path, 2222)
+    content = path.read_text(encoding="utf-8")
+    assert "anki_id: 2222" in content
+    assert "anki_id: 1111" not in content
+
+
+def test_write_anki_id_preserves_other_fields(tmp_path: Path) -> None:
+    path = write_annotation(_make_annotation(page=7, location=77), tmp_path)
+    write_anki_id(path, 42)
+    parsed = parse_annotation_md(path)
+    assert parsed.page == 7
+    assert parsed.location == 77
+    assert parsed.anki_id == 42
