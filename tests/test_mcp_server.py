@@ -12,6 +12,7 @@ from otb.anki import AnkiConnectError, ExportResult
 from otb.mcp_server import (
     anki_export,
     generate_book_index,
+    kindle_import_annotations,
     parse_kindle_export,
     parse_md_annotations_dir,
     parse_zotero_export,
@@ -299,3 +300,41 @@ def test_parse_zotero_export_file_not_directory(tmp_path: Path) -> None:
     f.write_text("x", encoding="utf-8")
     with pytest.raises(NotADirectoryError):
         parse_zotero_export(str(f))
+
+
+# --- kindle_import_annotations prompt ---
+
+
+def test_kindle_import_returns_messages() -> None:
+    result = kindle_import_annotations(
+        file_path="/tmp/exports/test.html"
+    )
+    assert len(result) >= 1
+    assert result[0].role == "user"
+
+
+def test_kindle_import_contains_tool_names() -> None:
+    result = kindle_import_annotations(
+        file_path="/tmp/exports/test.html"
+    )
+    text = result[0].content.text
+    assert "parse_kindle_export" in text
+    assert "save_annotations" in text
+    assert "/tmp/exports/test.html" in text
+
+
+def test_kindle_import_derives_notes_directory() -> None:
+    result = kindle_import_annotations(
+        file_path="/tmp/exports/test.html"
+    )
+    text = result[0].content.text
+    assert "/tmp/exports/notes/" in text
+
+
+def test_kindle_import_contains_title_instructions() -> None:
+    result = kindle_import_annotations(
+        file_path="/tmp/exports/test.html"
+    )
+    text = result[0].content.text
+    assert "title" in text.lower()
+    assert "10" in text

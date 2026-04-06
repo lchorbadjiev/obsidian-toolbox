@@ -280,6 +280,56 @@ def parse_zotero_export(path: str) -> list[dict[str, Any]]:
     return [_annotation_to_dict(a) for a in annotations]
 
 
+@mcp.prompt(
+    description=(
+        "Import Kindle annotations from an HTML export file. "
+        "Orchestrates: parse annotations, generate titles using a "
+        "lightweight AI model, and save as individual markdown files. "
+        "Returns step-by-step instructions for the MCP client to execute."
+    )
+)
+def kindle_import_annotations(
+    file_path: str,
+) -> list[UserMessage]:
+    """Return instructions to import Kindle annotations."""
+    output_dir = str(Path(file_path).parent / "notes")
+    text = (
+        "Import Kindle annotations using this workflow:\n"
+        "\n"
+        f"**Input file**: `{file_path}`\n"
+        f"**Output directory**: `{output_dir}/`\n"
+        "\n"
+        "## Step 1: Parse the Kindle export\n"
+        "\n"
+        f'Call `parse_kindle_export(path="{file_path}")`.\n'
+        "This returns a list of annotation dicts, each with "
+        "an empty `title` field.\n"
+        "\n"
+        "## Step 2: Generate titles\n"
+        "\n"
+        "For each annotation in the list, generate a concise "
+        "title (under 10 words) from the annotation `text` "
+        "field. Use a lightweight model (e.g. Haiku) as a "
+        "subagent for speed. Set the `title` field on each "
+        "annotation dict.\n"
+        "\n"
+        "If title generation fails for any annotation, fall "
+        "back to the first 7 words of the text, title-cased.\n"
+        "\n"
+        "## Step 3: Save annotations\n"
+        "\n"
+        "Call `save_annotations(annotations=<the list with "
+        f'titles>, directory="{output_dir}")`.\n'
+        "This writes one markdown file per annotation.\n"
+        "\n"
+        "## Expected result\n"
+        "\n"
+        "Report the number of files written and the output "
+        "directory path."
+    )
+    return [UserMessage(content=text)]
+
+
 def run() -> None:
     """Start the MCP server using stdio transport."""
     mcp.run(transport="stdio")

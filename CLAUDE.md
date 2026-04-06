@@ -85,6 +85,8 @@ manually run `git add .beads/ && git commit`.
 
 ## Active Technologies
 
+- Python 3.12+ + mcp (FastMCP) — no new deps
+  (008-kindle-import-prompt)
 - Python 3.12+ + all existing (`click`,
   `beautifulsoup4`, `mcp`) — no new deps
   (002-parse-md-highlights)
