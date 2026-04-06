@@ -45,14 +45,22 @@ Once added, Claude Code will start the server automatically when you
 open a project. The following tools and prompts become available to
 the agent:
 
-| Name                       | Type   | Description                           |
-| -------------------------- | ------ | ------------------------------------- |
-| `parse_kindle_export`      | tool   | Parse a Kindle HTML export            |
-| `parse_zotero_export`      | tool   | Parse a Zotero annotation export      |
-| `save_annotations`         | tool   | Save annotations as `.md` files       |
-| `parse_md_annotations_dir` | tool   | Read a directory of annotation files  |
-| `anki_export`              | tool   | Export annotations to an Anki deck    |
-| `generate_book_index`      | prompt | Generate a book index markdown file   |
+**Tools:**
+
+- `parse_kindle_export` — Parse Kindle HTML export to a
+  temp JSON file; returns summary (path, count, metadata)
+- `parse_zotero_export` — Parse a Zotero annotation export
+- `save_annotations` — Save annotations as `.md` files
+  (from a JSON file path or inline list)
+- `parse_md_annotations_dir` — Read annotation `.md` files
+- `anki_export` — Export annotations to an Anki deck
+
+**Prompts:**
+
+- `generate_book_index` — Generate a book index markdown
+  file from a directory of annotation files
+- `kindle_import_annotations` — Orchestrate full Kindle
+  import: parse → generate titles in batches → save
 
 ## Workflow: Kindle Export → Markdown Annotations → Book Index
 
@@ -63,17 +71,25 @@ an HTML file (e.g. `A Brief History of Time - Notebook.html`).
 
 ### Step 2 — Parse and save annotations
 
-Ask Claude (with the MCP server active):
+The easiest way is to use the `kindle_import_annotations` prompt,
+which orchestrates the full workflow automatically:
 
-> Parse the Kindle export at `~/Downloads/A Brief History of Time - Notebook.html`,
-> generate a short title for each annotation, then save them to
-> `~/notes/a-brief-history/notes/`.
+> Use the `kindle_import_annotations` prompt with
+> `~/Downloads/A Brief History of Time - Notebook.html`.
 
 Claude will:
 
-1. Call `parse_kindle_export` to read the HTML file.
-2. Generate a concise title (under 10 words) for each annotation.
-3. Call `save_annotations` to write one `.md` file per annotation.
+1. Call `parse_kindle_export` to parse the HTML file and write all
+   annotations to a temp JSON file (returns a summary with file path,
+   count, book title, and chapters — not the full annotation data).
+2. Read the temp file in batches of ~30, generate a concise title
+   (under 10 words) for each annotation using subagents.
+3. Call `save_annotations(file_path=..., directory=...)` to write one
+   `.md` file per annotation from the temp file.
+
+This file-path-based workflow keeps large annotation sets (100+) out
+of the LLM context window. The `save_annotations` tool also accepts
+an inline `annotations` list for smaller datasets.
 
 Each output file follows this format:
 
