@@ -11,6 +11,7 @@ uv run pytest                  # run all tests
 uv run pytest tests/test_X.py  # run a single test file
 uv run mypy src/ tests/        # type-check
 uv run pylint src/ tests/      # lint (target: 10/10)
+npx markdownlint-cli "**/*.md" # markdown lint (zero errors)
 ```
 
 ## Architecture

@@ -286,7 +286,7 @@ tool tests.
 
 ## Parallel Example: Phase 2 (Foundational)
 
-```
+```text
 # Write all three failing test tasks together:
 Task T002: "Write failing test for Annotation.anki_id in tests/test_parser.py"
 Task T003: "Write failing test for anki_id round-trip in tests/test_md_parser.py"
@@ -300,7 +300,7 @@ Task T007: "Add write_anki_id to src/otb/md_writer.py"
 
 ## Parallel Example: Phase 3 (US1 Tests)
 
-```
+```text
 # All four test tasks can be written in parallel:
 Task T008: "build_card tests in tests/test_anki.py"
 Task T009: "AnkiClient._call tests in tests/test_anki.py"

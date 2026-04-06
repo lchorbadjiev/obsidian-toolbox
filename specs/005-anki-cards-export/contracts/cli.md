@@ -4,7 +4,7 @@
 
 ## Command
 
-```
+```text
 otb anki export [OPTIONS] PATH
 ```
 
@@ -38,7 +38,7 @@ otb anki export [OPTIONS] PATH
 
 On success, the command writes a single summary line to stdout:
 
-```
+```text
 Created: 42  Skipped: 3  Failed: 0
 ```
 
@@ -46,7 +46,7 @@ Created: 42  Skipped: 3  Failed: 0
 
 All errors and warnings are written to stderr. Examples:
 
-```
+```text
 Error: Cannot connect to Anki at http://localhost:8765.
        Make sure Anki is running with the AnkiConnect add-on installed.
 

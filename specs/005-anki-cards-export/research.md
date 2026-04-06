@@ -13,6 +13,7 @@ POST to `http://localhost:8765` with `Content-Type: application/json` and
 a body of `{"action": "...", "version": 6, "params": {...}}`.
 
 **Alternatives considered**:
+
 - `requests` / `httpx` — rejected; Constitution Principle V prohibits new
   dependencies when the stdlib can reasonably solve the problem. Both
   libraries would add install overhead with no functional benefit here.
@@ -31,15 +32,18 @@ duplicate checking on the "Basic" note type compares the Front field
 within the target deck. No pre-query needed.
 
 **AnkiConnect response contract**:
+
 ```json
 {
   "result": [1234567890, null, 1234567891],
   "error": null
 }
 ```
+
 `null` at position `i` means note `i` was not added (duplicate or invalid).
 
 **Alternatives considered**:
+
 - `findNotes` query before each `addNote` — rejected; two round-trips per
   card and does not batch cleanly.
 - `canAddNotes` — rejected; returns only a boolean array, not IDs; still
@@ -57,6 +61,7 @@ unambiguously maps to the markdown parser; a file unambiguously maps to
 the HTML parser. No `--format` flag is needed.
 
 **Alternatives considered**:
+
 - Explicit `--format html|md` flag — rejected; adds user burden with no
   benefit since the path type already carries the information.
 - File extension detection (`.html`) — rejected; less reliable than
@@ -77,6 +82,7 @@ the first sentence, up to 7 words) is concise and sufficient as a prompt.
 **Back field**: Always the full `text` of the annotation.
 
 **Alternatives considered**:
+
 - Include page/location number — rejected; adds noise without mnemonic
   value on the front of a flashcard.
 - Use only text snippet — rejected; the title is already designed to be a
@@ -107,6 +113,7 @@ kindle` and `otb md` groups.
 future Anki-related subcommands (e.g., `otb anki sync`).
 
 **Alternatives considered**:
+
 - Top-level `otb anki-export` — rejected; breaks the `group/subcommand`
   pattern used everywhere else.
 
@@ -119,6 +126,7 @@ delegating to the same service function used by the CLI command
 (Constitution Principle VI).
 
 **MCP tool signature**:
+
 ```python
 def anki_export(
     path: str,
@@ -126,6 +134,7 @@ def anki_export(
     anki_url: str = "http://localhost:8765",
 ) -> dict[str, Any]
 ```
+
 Returns `{"created": int, "skipped": int, "failed": int}`.
 
 ---
@@ -133,6 +142,7 @@ Returns `{"created": int, "skipped": int, "failed": int}`.
 ## Decision 8: New Module Structure
 
 **Decision**: Add `src/otb/anki.py` containing:
+
 1. `AnkiConnectError` — typed exception for API-level errors.
 2. `AnkiClient` — thin wrapper around `urllib.request` for AnkiConnect
    calls (`create_deck`, `add_notes`).
@@ -152,12 +162,15 @@ The service function pattern matches the existing codebase style.
 All calls: `POST http://localhost:8765`
 
 ### `createDeck`
+
 ```json
 {"action": "createDeck", "version": 6, "params": {"deck": "My Deck"}}
 ```
+
 Response: `{"result": 1234567890, "error": null}`
 
 ### `addNotes`
+
 ```json
 {
   "action": "addNotes",
@@ -174,5 +187,7 @@ Response: `{"result": 1234567890, "error": null}`
   }
 }
 ```
+
 Response: `{"result": [1234567890, null], "error": null}`
+
 `null` = duplicate or invalid note (not created).

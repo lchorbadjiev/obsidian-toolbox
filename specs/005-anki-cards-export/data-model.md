@@ -17,16 +17,16 @@ Defined in `src/otb/parser.py`. No changes.
 
 Defined in `src/otb/parser.py`. No changes.
 
-| Field      | Type         | Description                               |
-|------------|--------------|-------------------------------------------|
-| `book`     | `Book`       | Parent book                               |
-| `chapter`  | `str`        | Chapter heading (may be empty)            |
-| `page`     | `int`        | Page number                               |
-| `location` | `int`        | Kindle location                           |
-| `text`     | `str`        | Full annotation text (card back)          |
-| `title`    | `str`        | Auto-generated short title (card front)   |
-| `color`    | `str | None` | Highlight colour (unused in v1)           |
-| `number`   | `int`        | Sequence number within the book           |
+| Field      | Type          | Description                               |
+|------------|---------------|-------------------------------------------|
+| `book`     | `Book`        | Parent book                               |
+| `chapter`  | `str`         | Chapter heading (may be empty)            |
+| `page`     | `int`         | Page number                               |
+| `location` | `int`         | Kindle location                           |
+| `text`     | `str`         | Full annotation text (card back)          |
+| `title`    | `str`         | Auto-generated short title (card front)   |
+| `color`    | `str \| None` | Highlight colour (unused in v1)           |
+| `number`   | `int`         | Sequence number within the book           |
 
 ---
 
@@ -56,12 +56,12 @@ single card.
 
 ## Card Content Mapping
 
-| Card Field | Source                                             |
-|------------|----------------------------------------------------|
-| **Front**  | `"{chapter} — {title}"` if chapter non-empty;     |
-|            | `"{title}"` if chapter is empty;                   |
-|            | First 60 chars of `text` (+ `…`) if title empty   |
-| **Back**   | `annotation.text` (full, unmodified)               |
+| Card Field | Source                                                |
+| ---------- | ----------------------------------------------------- |
+| **Front**  | `"{chapter} - {title}"` when chapter is non-empty     |
+|            | `"{title}"` when chapter is empty                     |
+|            | First 60 chars of `text` (truncated) if title empty   |
+| **Back**   | `annotation.text` (full, unmodified)                  |
 
 ---
 

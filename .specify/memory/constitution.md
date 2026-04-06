@@ -1,21 +1,19 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.1 → 1.2.0
+Version change: 1.2.0 → 1.3.0
 
-Modified principles: None renamed.
+Modified principles:
+  VII. Document Formatting — Added markdownlint enforcement requirement
+       for all markdown files in the repository (not just speckit docs).
 
-Added sections:
-  VII. Document Formatting — 80-character line width rule for all markdown
-       documents produced during speckit workflow (specs, plans, tasks,
-       research, quickstart, data-model, contracts).
+Added sections: N/A
 
 Removed sections: N/A
 
 Templates checked:
-  ✅ .specify/templates/plan-template.md — Added formatting note.
-  ✅ .specify/templates/spec-template.md — No structural change needed;
-     principle applies to generated output, not the template itself.
+  ✅ .specify/templates/plan-template.md — No structural change needed.
+  ✅ .specify/templates/spec-template.md — No structural change needed.
   ✅ .specify/templates/tasks-template.md — No structural change needed.
   ✅ .specify/templates/constitution-template.md — Source template;
      no changes needed.
@@ -130,9 +128,27 @@ contract definitions — MUST wrap prose lines at 80 characters.
 - Frontmatter (YAML) values are exempt.
 - Headings are exempt (keep them on one line).
 
+All markdown files committed to the repository MUST pass
+`npx markdownlint-cli <file>` with zero errors before committing.
+This applies to every `.md` file: README, specs, plans, tasks,
+research notes, quickstart guides, data models, and contract
+definitions.
+
+- Run `npx markdownlint-cli "**/*.md"` from the repo root to check
+  all files at once, or target a single file as needed.
+- If a rule conflicts with a legitimate formatting need (e.g. a long
+  URL that cannot be wrapped), disable the specific rule inline with
+  a `<!-- markdownlint-disable-line MDXXX -->` comment and add a
+  one-line justification comment immediately above it.
+- Project-wide rule overrides MUST be recorded in
+  `.markdownlint.json` at the repo root with a comment explaining
+  the rationale.
+
 **Rationale**: Consistent line width makes diffs readable, enables
 side-by-side comparison in terminals and code review tools, and ensures
 documents render predictably in any Markdown viewer or editor.
+Automated linting catches formatting regressions that manual review
+misses.
 
 ## Technology Stack
 
@@ -143,6 +159,7 @@ documents render predictably in any Markdown viewer or editor.
 - **Testing**: pytest with fixture files in `tests/fixtures/`
 - **Type-checking**: mypy (strict, zero-error target)
 - **Linting**: pylint (10/10 target)
+- **Markdown linting**: markdownlint-cli via `npx` (zero-error target)
 - **Project layout**: `src` layout — package root at `src/otb/`
 
 Adding or removing a technology from this stack constitutes a MINOR amendment if additive
@@ -151,7 +168,8 @@ or a MAJOR amendment if a listed tool is removed or replaced.
 ## Development Workflow
 
 - **Before committing**: `uv run pytest` AND `uv run mypy src/ tests/` AND
-  `uv run pylint src/ tests/` MUST all pass cleanly.
+  `uv run pylint src/ tests/` AND `npx markdownlint-cli "**/*.md"` MUST
+  all pass cleanly.
 - **New parser**: add fixture → write failing test → implement → verify green.
 - **New CLI command**: add Click command → wire to parser or service function → add
   integration test covering the command output.
@@ -188,4 +206,4 @@ the Complexity Tracking table.
 
 Use `CLAUDE.md` for runtime development guidance (commands, architecture, file layout).
 
-**Version**: 1.2.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-05
+**Version**: 1.3.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-06

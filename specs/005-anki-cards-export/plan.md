@@ -33,18 +33,18 @@ still exists in Anki; stale IDs (note deleted) trigger re-creation.
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
-| I. CLI-First | PASS | `otb anki export` command added to Click group |
-| II. Shared Parser Contract | PASS | Uses existing `Annotation` dataclass and |
-| | | `parse_notebook` / `parse_annotation_dir` |
-| III. Test-First | PASS | Tests written before implementation code; |
-| | | AnkiConnect calls mocked in unit tests |
-| IV. Type Safety & Lint | PASS | mypy + pylint 10/10 enforced |
-| V. Simplicity / Min Deps | PASS | `urllib.request` used; no new packages |
-| VI. MCP Server | PASS | `anki_export` MCP tool delegates to same |
-| | | service function as CLI |
-| VII. Document Formatting | PASS | 80-char line wrap enforced in all docs |
+| Principle                  | Status | Notes                                       |
+| -------------------------- | ------ | ------------------------------------------- |
+| I. CLI-First               | PASS   | `otb anki export` added to Click group      |
+| II. Shared Parser Contract | PASS   | Uses existing `Annotation` dataclass and    |
+|                            |        | `parse_annotation_dir`                      |
+| III. Test-First            | PASS   | Tests written before implementation code;   |
+|                            |        | AnkiConnect calls mocked in unit tests      |
+| IV. Type Safety & Lint     | PASS   | mypy + pylint 10/10 enforced                |
+| V. Simplicity / Min Deps   | PASS   | `urllib.request` used; no new packages      |
+| VI. MCP Server             | PASS   | `anki_export` MCP tool delegates to same    |
+|                            |        | service function as CLI                     |
+| VII. Document Formatting   | PASS   | 80-char line wrap enforced in all docs      |
 
 ## Project Structure
 
@@ -90,14 +90,14 @@ Research complete. See [research.md](research.md).
 
 All NEEDS CLARIFICATION items resolved:
 
-| Question | Decision |
-|----------|----------|
-| HTTP client | `urllib.request` (stdlib, no new deps) |
-| Duplicate detection | `anki_id`-first; `notesInfo` verifies stale IDs |
-| Input source | markdown annotation directories only (no HTML) |
-| Card front format | `{chapter} — {title}` or `{title}` if no chapter |
-| CLI placement | `otb anki export` (new `anki` group) |
-| MCP tool | `anki_export` delegating to `export_annotations` |
+| Question             | Decision                                          |
+| -------------------- | ------------------------------------------------- |
+| HTTP client          | `urllib.request` (stdlib, no new deps)            |
+| Duplicate detection  | `anki_id`-first; `notesInfo` verifies stale IDs   |
+| Input source         | markdown annotation directories only (no HTML)    |
+| Card front format    | `{chapter} - {title}` or `{title}` if no chapter  |
+| CLI placement        | `otb anki export` (new `anki` group)              |
+| MCP tool             | `anki_export` delegating to `export_annotations`  |
 
 ## Phase 1: Design & Contracts
 
@@ -116,12 +116,14 @@ Design complete.
    top-level error or is unreachable.
 
 2. `AnkiClient` — thin wrapper:
+
    ```python
    class AnkiClient:
        def __init__(self, url: str = "http://localhost:8765") -> None: ...
        def create_deck(self, deck: str) -> None: ...
        def add_notes(self, notes: list[dict]) -> list[int | None]: ...
    ```
+
    Uses `urllib.request.urlopen` with a JSON body. Raises
    `AnkiConnectError` on connection failure or non-null `error` field.
 
@@ -161,6 +163,7 @@ def anki_export(
 ### Test Strategy
 
 **Unit tests** (no Anki running):
+
 - `build_card`: covers chapter/no-chapter/empty-title cases.
 - `AnkiClient._call`: mock `urllib.request.urlopen`; cover success, null
   results, and connection errors.
@@ -168,11 +171,12 @@ def anki_export(
   mixed, and blank-annotation cases.
 
 **CLI integration tests** (mock `export_annotations`):
-- Happy path with HTML fixture path.
+
 - Happy path with annotations directory fixture.
 - `--deck` override.
 - Anki unreachable → non-zero exit + stderr message.
 
 **MCP tool tests** (mock `export_annotations`):
+
 - Tool inputs and outputs conform to schema.
 - `FileNotFoundError` and `AnkiConnectError` produce MCP error responses.
