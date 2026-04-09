@@ -1,0 +1,29 @@
+Title 
+Building Evolutionary Architectures
+Authors 
+Ford, Neal;Parsons, Rebecca;Kua, Patrick;Sadalage, Pramod;
+Formats 
+EPUB, PDF
+Folder 
+Book files
+Publisher 
+O'Reilly Media, Incorporated
+Author sort 
+Ford, Neal;Parsons, Rebecca;Kua, Patrick;Sadalage, Pramod;
+Title sort 
+Building Evolutionary Architectures
+Date 
+28 Nov 2024
+uuid 
+4dbf9653-70de-4344-8c4e-942242f6979a
+Id 
+1357
+Published 
+Nov 2022
+Modified 
+15 Jun 2025
+Size 
+15.45 MB
+Languages 
+English
+

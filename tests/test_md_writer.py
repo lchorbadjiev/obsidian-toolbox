@@ -169,3 +169,17 @@ def test_write_anki_id_preserves_other_fields(tmp_path: Path) -> None:
     assert parsed.page == "7"
     assert parsed.location == 77
     assert parsed.anki_id == 42
+
+
+def test_html_color_in_markdown_output(tmp_path: Path) -> None:
+    a = _make_annotation(color="#ffd400")
+    path = write_annotation(a, tmp_path)
+    content = path.read_text(encoding="utf-8")
+    assert 'color: "#ffd400"' in content
+
+
+def test_no_color_when_none(tmp_path: Path) -> None:
+    a = _make_annotation(color=None)
+    path = write_annotation(a, tmp_path)
+    content = path.read_text(encoding="utf-8")
+    assert "color:" not in content

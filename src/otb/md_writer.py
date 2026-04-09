@@ -28,9 +28,10 @@ def _render(a: Annotation) -> str:
         f"location: {a.location}",
         "type: annotation",
         f"number: {a.number}",
-        "---",
-        "",
     ]
+    if a.color:
+        lines.append(f'color: "{a.color}"')
+    lines += ["---", ""]
     if a.title:
         lines.append(f"# {a.title}")
         lines.append("")

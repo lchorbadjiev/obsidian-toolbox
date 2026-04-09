@@ -1,5 +1,5 @@
 """Tests for the Zotero annotation parser."""
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,import-outside-toplevel
 from pathlib import Path
 from unittest.mock import patch
 
@@ -202,3 +202,75 @@ def test_aspell_not_found_raises() -> None:
     with patch("otb.word_fixer.shutil.which", return_value=None):
         with pytest.raises(RuntimeError, match="aspell"):
             parse_zotero_annotations(FIXTURE_DIR)
+
+
+# ---------------------------------------------------------------------------
+# HTML parser tests
+# ---------------------------------------------------------------------------
+
+HTML_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "zotero-html"
+
+
+def test_parse_html_annotation_count() -> None:
+    annotations, _ = parse_zotero_annotations(HTML_FIXTURE_DIR)
+    assert len(annotations) > 100  # reasonable count
+
+
+def test_parse_html_first_annotation() -> None:
+    annotations, _ = parse_zotero_annotations(HTML_FIXTURE_DIR)
+    a = annotations[0]
+    assert "bit rot" in a.text
+    assert a.page == "14"
+    assert a.color == "#ffd400"
+
+
+def test_parse_html_color_variety() -> None:
+    annotations, _ = parse_zotero_annotations(HTML_FIXTURE_DIR)
+    colors = {a.color for a in annotations if a.color}
+    assert len(colors) >= 3
+
+
+def test_parse_html_color_stripped_alpha() -> None:
+    annotations, _ = parse_zotero_annotations(HTML_FIXTURE_DIR)
+    for a in annotations:
+        if a.color:
+            assert len(a.color) == 7  # "#XXXXXX"
+            assert a.color.startswith("#")
+
+
+def test_parse_html_with_word_fixing() -> None:
+    annotations, _ = parse_zotero_annotations(HTML_FIXTURE_DIR)
+    all_text = " ".join(a.text for a in annotations)
+    # Word fixer should fix concatenated words
+    assert "softwareentropy" not in all_text.lower()
+
+
+def test_fallback_to_markdown(tmp_path: Path) -> None:
+    """Only Annotations.md present → uses markdown parser."""
+    import shutil
+    shutil.copy(FIXTURE_DIR / "book.txt", tmp_path / "book.txt")
+    shutil.copy(
+        FIXTURE_DIR / "Annotations.md", tmp_path / "Annotations.md"
+    )
+    annotations, _ = parse_zotero_annotations(tmp_path)
+    assert len(annotations) == 306
+    assert all(a.color is None for a in annotations)
+
+
+def test_prefer_html_over_markdown(tmp_path: Path) -> None:
+    """Both files present → uses HTML (has colors)."""
+    import shutil
+    shutil.copy(
+        HTML_FIXTURE_DIR / "book.txt", tmp_path / "book.txt"
+    )
+    shutil.copy(
+        HTML_FIXTURE_DIR / "Annotations.html",
+        tmp_path / "Annotations.html",
+    )
+    # Also copy a dummy markdown so both exist
+    (tmp_path / "Annotations.md").write_text(
+        "# Annotations\n", encoding="utf-8"
+    )
+    annotations, _ = parse_zotero_annotations(tmp_path)
+    # Should have colors (HTML was used)
+    assert any(a.color is not None for a in annotations)
