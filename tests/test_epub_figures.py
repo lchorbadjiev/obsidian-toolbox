@@ -249,3 +249,54 @@ def test_parse_boox_export_figures(tmp_path: Path) -> None:
         annotations = _json.load(f)
     assert len(annotations[0]["figures"]) == 1
     assert annotations[0]["figures"][0]["label"] == "1.1"
+
+
+# ---------------------------------------------------------------------------
+# Regression: MCP workflow save_annotations preserves image links
+# ---------------------------------------------------------------------------
+
+
+def test_save_annotations_with_figure_images_dir(tmp_path: Path) -> None:
+    """Reproduce bug: images copied but links lost in MCP workflow."""
+    from otb.mcp_server import save_annotations as mcp_save
+
+    # Setup: create a temp JSON with annotation that has figures
+    import json as _json
+
+    ann_dict = {
+        "book_title": "Test",
+        "author": "Author",
+        "chapter": "Ch1",
+        "page": "",
+        "location": 1,
+        "text": "FIGURE 1.1. Test caption.",
+        "title": "Figure 1.1",
+        "color": None,
+        "number": 1,
+        "figures": [{"label": "1.1", "image_path": "images/figure-1-1.jpg"}],
+    }
+    json_file = tmp_path / "annotations.json"
+    json_file.write_text(_json.dumps([ann_dict]), encoding="utf-8")
+
+    # Setup: create a temp figures dir with an image
+    fig_dir = tmp_path / "fig_tmp"
+    (fig_dir / "images").mkdir(parents=True)
+    (fig_dir / "images" / "figure-1-1.jpg").write_bytes(
+        b"\xff\xd8\xff\xe0" + b"\x00" * 20
+    )
+
+    out_dir = tmp_path / "output"
+    mcp_save(
+        directory=str(out_dir),
+        file_path=str(json_file),
+        figure_images_dir=str(fig_dir),
+    )
+
+    # Verify image was copied
+    assert (out_dir / "images" / "figure-1-1.jpg").exists()
+
+    # Verify markdown contains image link (this was the bug)
+    md_files = list(out_dir.glob("*.md"))
+    assert len(md_files) == 1
+    content = md_files[0].read_text(encoding="utf-8")
+    assert "![Figure 1.1]" in content

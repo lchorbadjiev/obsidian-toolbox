@@ -60,17 +60,24 @@ def write_annotation(
     path = directory / filename
     content = _render(a)
 
-    # Write figure images and append links
-    if figure_data and a.figures:
-        img_dir = directory / "images"
-        img_dir.mkdir(exist_ok=True)
+    # Write figure images (if data provided) and append links
+    if a.figures:
         img_lines: list[str] = []
+        if figure_data:
+            img_dir = directory / "images"
+            img_dir.mkdir(exist_ok=True)
         for fig in a.figures:
-            if fig.label in figure_data:
+            if figure_data and fig.label in figure_data:
                 img_bytes, ext = figure_data[fig.label]
                 normalized = f"figure-{fig.label.replace('.', '-')}{ext}"
                 (img_dir / normalized).write_bytes(img_bytes)
                 fig.image_path = f"images/{normalized}"
+            if fig.image_path:
+                img_lines.append(
+                    f"![Figure {fig.label}]({fig.image_path})"
+                )
+            else:
+                normalized = f"figure-{fig.label.replace('.', '-')}.jpg"
                 img_lines.append(
                     f"![Figure {fig.label}](images/{normalized})"
                 )

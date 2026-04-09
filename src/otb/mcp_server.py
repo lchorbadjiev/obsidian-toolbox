@@ -19,7 +19,7 @@ from mcp.server.fastmcp.prompts.base import UserMessage
 from otb.anki import export_annotations
 from otb.md_parser import parse_annotation_dir_with_paths, parse_annotation_md
 from otb.md_writer import write_annotations
-from otb.parser import Annotation, Book, parse_notebook
+from otb.parser import Annotation, Book, FigureRef, parse_notebook
 from otb.boox_parser import parse_boox_annotations
 from otb.zotero_parser import parse_zotero_annotations
 
@@ -53,6 +53,13 @@ def _annotation_to_dict(a: Annotation) -> dict[str, Any]:
 
 
 def _dict_to_annotation(d: dict[str, Any]) -> Annotation:
+    figures = [
+        FigureRef(
+            label=str(f["label"]),
+            image_path=str(f.get("image_path", "")),
+        )
+        for f in d.get("figures", [])
+    ]
     return Annotation(
         book=Book(title=str(d["book_title"]), author=str(d["author"])),
         chapter=str(d.get("chapter", "")),
@@ -62,6 +69,7 @@ def _dict_to_annotation(d: dict[str, Any]) -> Annotation:
         title=str(d.get("title", "")),
         color=str(d["color"]) if d.get("color") is not None else None,
         number=int(d.get("number", 0)),
+        figures=figures,
     )
 
 
