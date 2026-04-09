@@ -5,7 +5,11 @@ from pathlib import Path
 
 from otb.epub_figures import FigureMap
 from otb.parser import Annotation, Book, FigureRef, _title_from_text
-from otb.pdf_figures import detect_zotero_figure_refs, extract_pdf_figures
+from otb.pdf_figures import (
+    detect_zotero_figure_refs,
+    extract_pdf_figures,
+    merge_split_annotations,
+)
 from otb.word_fixer import check_aspell_available, fix_concatenated_words
 
 
@@ -110,11 +114,14 @@ def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-
             )
         )
 
+    # Merge split annotations if PDF available
+    pdf_path = _find_pdf(directory)
+    annotations = merge_split_annotations(annotations, pdf_path)
+
     for i, a in enumerate(annotations, start=1):
         a.number = i
 
     # Extract figures from PDF if present
-    pdf_path = _find_pdf(directory)
     figure_map: FigureMap = {}
     if pdf_path:
         all_refs: list[tuple[str, str]] = []

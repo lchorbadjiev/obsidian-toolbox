@@ -6,6 +6,7 @@ from pathlib import Path
 from pypdf import PdfReader
 
 from otb.epub_figures import FigureMap
+from otb.parser import Annotation, _title_from_text
 
 
 _FIGURE_RE = re.compile(
@@ -118,3 +119,115 @@ def _search_nearby_pages(
             if result:
                 return result
     return None
+
+
+_MERGE_GAP_THRESHOLD = 10
+_MATCH_CHARS = 30
+
+
+def extract_page_text(pdf_path: Path, page_num: int) -> str:
+    """Extract text content from a PDF page.
+
+    Returns empty string on failure.
+    """
+    try:
+        reader = PdfReader(pdf_path)
+        if page_num < 0 or page_num >= len(reader.pages):
+            return ""
+        return reader.pages[page_num].extract_text() or ""
+    except Exception:  # pylint: disable=broad-exception-caught  # graceful fallback
+        return ""
+
+
+def _are_adjacent_in_pdf(  # pylint: disable=too-many-locals  # text matching requires tracking multiple positions
+    pdf_path: Path, text_a: str, page_a: int,
+    text_b: str, page_b: int,
+) -> bool:
+    """Check if two annotation texts are adjacent in the PDF."""
+    pdf_text_a = extract_page_text(pdf_path, page_a)
+    pdf_text_b = extract_page_text(pdf_path, page_b)
+    if not pdf_text_a or not pdf_text_b:
+        return False
+
+    # Normalize whitespace for matching (PDF text has newlines
+    # where the original text has spaces or nothing)
+    combined = " ".join((pdf_text_a + " " + pdf_text_b).split())
+
+    # Use last/first few words for matching, stripping leading
+    # punctuation to handle PDF spacing quirks (e.g., em-dash)
+    words_a = text_a.split()
+    words_b = text_b.split()
+    tail = " ".join(words_a[-4:]) if len(words_a) > 4 else " ".join(words_a)
+    # Strip leading non-alnum from first word of head for matching
+    head_words = list(words_b[:4]) if len(words_b) > 4 else list(words_b)
+    if head_words:
+        head_words[0] = head_words[0].lstrip(
+            "\u2014\u2013\u2012\u2010-\u201c\u201d\"'([{"
+        )
+    head = " ".join(head_words)
+
+    if not tail or not head:
+        return False
+
+    pos_a = combined.find(tail)
+    pos_b = combined.find(head, max(0, pos_a) if pos_a >= 0 else 0)
+
+    if pos_a < 0 or pos_b < 0:
+        return False
+
+    gap = pos_b - (pos_a + len(tail))
+    return 0 <= gap <= _MERGE_GAP_THRESHOLD
+
+
+def merge_split_annotations(
+    annotations: list[Annotation],
+    pdf_path: Path | None,
+) -> list[Annotation]:
+    """Merge consecutive annotations split across page boundaries.
+
+    When a PDF is available, checks if consecutive annotations on
+    adjacent pages are adjacent in the PDF text (gap <= 10 chars).
+    If so, merges them by concatenating text. Supports chained
+    merges across 3+ pages.
+
+    Returns the (possibly shorter) list of annotations.
+    """
+    if not pdf_path or len(annotations) < 2:
+        return annotations
+
+    merged: list[Annotation] = []
+    i = 0
+    while i < len(annotations):
+        current = annotations[i]
+        # Try to merge with subsequent annotations
+        while i + 1 < len(annotations):
+            nxt = annotations[i + 1]
+            try:
+                page_cur = int(current.page)
+                page_nxt = int(nxt.page)
+            except (ValueError, TypeError):
+                break
+            if page_nxt != page_cur + 1:
+                break
+            if not _are_adjacent_in_pdf(
+                pdf_path, current.text, page_cur - 1,
+                nxt.text, page_nxt - 1,
+            ):
+                break
+            # Merge: concatenate text, keep first annotation's metadata
+            current = Annotation(
+                book=current.book,
+                chapter=current.chapter,
+                page=current.page,
+                location=current.location,
+                text=current.text + " " + nxt.text,
+                title=_title_from_text(
+                    current.text + " " + nxt.text
+                ),
+                color=current.color,
+            )
+            i += 1
+        merged.append(current)
+        i += 1
+
+    return merged

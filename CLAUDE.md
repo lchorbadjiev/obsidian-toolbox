@@ -85,6 +85,9 @@ manually run `git add .beads/ && git commit`.
 
 ## Active Technologies
 
+- Python 3.12+ + `pypdf` (already installed) (014-merge-split-annotations)
+- Filesystem (reads PDF for text extraction) (014-merge-split-annotations)
+
 - Python 3.12+ + `pypdfium2` (NEW — PDF rendering) (013-pdf-figure-extract)
 - Filesystem (reads PDF, writes PNG images + markdown) (013-pdf-figure-extract)
 
