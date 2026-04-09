@@ -209,6 +209,8 @@ def merge_split_annotations(
                 break
             if page_nxt != page_cur + 1:
                 break
+            if current.color != nxt.color:
+                break
             if not _are_adjacent_in_pdf(
                 pdf_path, current.text, page_cur - 1,
                 nxt.text, page_nxt - 1,

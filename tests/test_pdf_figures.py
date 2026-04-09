@@ -310,6 +310,34 @@ def test_merge_split_annotations_not_adjacent() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Different colors → no merge
+# ---------------------------------------------------------------------------
+
+
+def test_merge_split_annotations_different_colors() -> None:
+    anns = [
+        _make_ann("first text", page="1"),
+        _make_ann("second text", page="2"),
+    ]
+    anns[0].color = "#ffd400"
+    anns[1].color = "#ff6666"
+    result = merge_split_annotations(anns, TEST_PDF)
+    assert len(result) == 2
+
+
+def test_merge_split_annotations_same_color() -> None:
+    anns = [
+        _make_ann("first text", page="1"),
+        _make_ann("second text", page="1"),
+    ]
+    anns[0].color = "#ffd400"
+    anns[1].color = "#ffd400"
+    # Same page, same color — but not adjacent pages, so no merge
+    result = merge_split_annotations(anns, TEST_PDF)
+    assert len(result) == 2
+
+
+# ---------------------------------------------------------------------------
 # T003: no PDF → no merge
 # ---------------------------------------------------------------------------
 
