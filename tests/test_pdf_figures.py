@@ -60,7 +60,21 @@ def test_extract_page_image_missing_pdf() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_detect_zotero_figure_refs_caption() -> None:
+def test_search_nearby_pages_finds_image_on_adjacent_page() -> None:
+    """Figure on page N+1 when annotation references page N."""
+    from otb.pdf_figures import extract_pdf_figures
+
+    # test.pdf has image on page 0 (= page 1 in 1-indexed)
+    # Simulate a ref pointing to page 2 (0-indexed: 1) — no image
+    # The search should find the image on page 0 (offset -1)
+    refs = [("1-1", "2")]  # page 2 has no image, page 1 does
+    result = extract_pdf_figures(TEST_PDF, refs)
+    assert "1-1" in result
+    img_bytes, _ext = result["1-1"]
+    assert len(img_bytes) > 0
+
+
+
     text = "Figure 5-2. Monolithic architectures always have a quantum"
     refs = detect_zotero_figure_refs(text, "107")
     assert refs == [("5-2", "107")]

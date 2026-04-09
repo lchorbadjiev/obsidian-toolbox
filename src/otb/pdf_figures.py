@@ -86,13 +86,35 @@ def extract_pdf_figures(
                 file=sys.stderr,
             )
             continue
-        result = extract_page_image(pdf_path, page_num)
+        result = _search_nearby_pages(pdf_path, page_num)
         if result:
             figure_map[label] = result
         else:
             print(
-                f"Warning: No image found on page {page_str} "
+                f"Warning: No image found near page {page_str} "
                 f"for Figure {label}",
                 file=sys.stderr,
             )
     return figure_map
+
+
+_SEARCH_RANGE = 5
+
+
+def _search_nearby_pages(
+    pdf_path: Path, center_page: int,
+) -> tuple[bytes, str] | None:
+    """Search for a figure image on the center page and nearby.
+
+    Checks the center page first, then expands outward up to
+    +/- _SEARCH_RANGE pages.
+    """
+    result = extract_page_image(pdf_path, center_page)
+    if result:
+        return result
+    for offset in range(1, _SEARCH_RANGE + 1):
+        for candidate in (center_page + offset, center_page - offset):
+            result = extract_page_image(pdf_path, candidate)
+            if result:
+                return result
+    return None
