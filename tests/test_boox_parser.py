@@ -31,7 +31,8 @@ def test_parse_book_metadata() -> None:
 
 @pytest.fixture
 def annotations() -> list[Annotation]:
-    return parse_boox_annotations(FIXTURE_DIR)
+    result, _figure_map = parse_boox_annotations(FIXTURE_DIR)
+    return result
 
 
 def test_annotation_count(annotations: list[Annotation]) -> None:
@@ -130,7 +131,7 @@ def test_empty_annotation_skipped(tmp_path: Path) -> None:
         "-------------------\n",
         encoding="utf-8",
     )
-    result = parse_boox_annotations(tmp_path)
+    result, _ = parse_boox_annotations(tmp_path)
     assert len(result) == 1
     assert result[0].text == "Some actual text here."
 

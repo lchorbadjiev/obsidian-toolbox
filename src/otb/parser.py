@@ -1,6 +1,6 @@
 """Parser for Kindle notebook HTML exports."""
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from bs4 import BeautifulSoup, Tag
@@ -12,6 +12,14 @@ class Book:
 
     title: str
     author: str
+
+
+@dataclass
+class FigureRef:
+    """A figure reference extracted from an EPUB."""
+
+    label: str
+    image_path: str = ""
 
 
 @dataclass
@@ -28,6 +36,7 @@ class Annotation:
     color: str | None = None
     number: int = 0
     anki_id: int | None = None
+    figures: list[FigureRef] = field(default_factory=list)
 
 
 _SENTENCE_END_RE = re.compile(r"[.!?]")

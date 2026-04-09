@@ -2,6 +2,7 @@
 import re
 from pathlib import Path
 
+from otb.epub_figures import FigureMap
 from otb.parser import Annotation
 
 _ANKI_ID_RE = re.compile(r"^anki_id:.*$", re.MULTILINE)
@@ -38,8 +39,16 @@ def _render(a: Annotation) -> str:
     return "\n".join(lines)
 
 
-def write_annotation(a: Annotation, directory: Path) -> Path:
+def write_annotation(
+    a: Annotation,
+    directory: Path,
+    figure_data: FigureMap | None = None,
+) -> Path:
     """Write a single annotation to a markdown file in directory.
+
+    If figure_data is provided and the annotation has figures, the
+    corresponding images are extracted to an images/ subdirectory
+    and image links are appended to the markdown.
 
     The directory is created if it does not exist. Returns the path written.
     """
@@ -49,7 +58,26 @@ def write_annotation(a: Annotation, directory: Path) -> Path:
     else:
         filename = f"{a.number:03d}.md"
     path = directory / filename
-    path.write_text(_render(a), encoding="utf-8")
+    content = _render(a)
+
+    # Write figure images and append links
+    if figure_data and a.figures:
+        img_dir = directory / "images"
+        img_dir.mkdir(exist_ok=True)
+        img_lines: list[str] = []
+        for fig in a.figures:
+            if fig.label in figure_data:
+                img_bytes, ext = figure_data[fig.label]
+                normalized = f"figure-{fig.label.replace('.', '-')}{ext}"
+                (img_dir / normalized).write_bytes(img_bytes)
+                fig.image_path = f"images/{normalized}"
+                img_lines.append(
+                    f"![Figure {fig.label}](images/{normalized})"
+                )
+        if img_lines:
+            content += "\n".join(img_lines) + "\n"
+
+    path.write_text(content, encoding="utf-8")
     return path
 
 
@@ -68,7 +96,11 @@ def write_anki_id(path: Path, anki_id: int) -> None:
     path.write_text(updated, encoding="utf-8")
 
 
-def write_annotations(annotations: list[Annotation], directory: Path) -> list[Path]:
+def write_annotations(
+    annotations: list[Annotation],
+    directory: Path,
+    figure_data: FigureMap | None = None,
+) -> list[Path]:
     """Write each annotation to its own markdown file.
 
     Raises OSError on the first write failure; already-written files remain.
@@ -76,5 +108,5 @@ def write_annotations(annotations: list[Annotation], directory: Path) -> list[Pa
     """
     paths: list[Path] = []
     for a in annotations:
-        paths.append(write_annotation(a, directory))
+        paths.append(write_annotation(a, directory, figure_data))
     return paths

@@ -85,6 +85,9 @@ manually run `git add .beads/ && git commit`.
 
 ## Active Technologies
 
+- Python 3.12+ + `beautifulsoup4` (already installed) (011-epub-figure-extract)
+- Filesystem (reads EPUB ZIP, writes images + markdown) (011-epub-figure-extract)
+
 - Python 3.12+ + mcp (FastMCP), click, beautifulsoup4 (009-kindle-import-file-passing)
 - Filesystem (temp JSON files, markdown output) (009-kindle-import-file-passing)
 - Python 3.12+ + None new — uses existing `click`, `mcp` (010-boox-parser)

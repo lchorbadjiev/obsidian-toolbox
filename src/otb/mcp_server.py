@@ -45,6 +45,10 @@ def _annotation_to_dict(a: Annotation) -> dict[str, Any]:
         "title": a.title,
         "color": a.color,
         "number": a.number,
+        "figures": [
+            {"label": f.label, "image_path": f.image_path}
+            for f in a.figures
+        ],
     }
 
 
@@ -355,7 +359,7 @@ def parse_boox_export(path: str) -> list[dict[str, Any]]:
         raise FileNotFoundError(f"Directory not found: {path}")
     if not resolved.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {path}")
-    annotations = parse_boox_annotations(resolved)
+    annotations, _figure_map = parse_boox_annotations(resolved)
     return [_annotation_to_dict(a) for a in annotations]
 
 

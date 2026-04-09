@@ -2,7 +2,8 @@
 import re
 from pathlib import Path
 
-from otb.parser import Annotation, _title_from_text
+from otb.epub_figures import FigureMap, detect_figure_refs, parse_epub_figures
+from otb.parser import Annotation, FigureRef, _title_from_text
 from otb.zotero_parser import parse_book_metadata
 
 
@@ -28,19 +29,31 @@ def _find_annotation_file(directory: Path) -> Path:
     return candidates[0]
 
 
-def parse_boox_annotations(
+def _find_epub(directory: Path) -> Path | None:
+    """Find a single .epub file in directory, or None."""
+    candidates = list(directory.glob("*.epub"))
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def parse_boox_annotations(  # pylint: disable=too-many-locals,too-many-branches  # line-based state machine with EPUB figure integration
     directory: Path,
-) -> list[Annotation]:
+) -> tuple[list[Annotation], FigureMap]:
     """Parse Boox annotation exports from a directory.
 
     The directory must contain book.txt and exactly one other .txt
-    annotation file. Returns a list of Annotation objects with
-    sequential numbering.
+    annotation file. Optionally extracts figures from an EPUB if
+    present. Returns a tuple of (annotations, figure_map).
 
     Raises FileNotFoundError if book.txt or the annotation file
     is missing.
     """
     book = parse_book_metadata(directory / "book.txt")
+
+    # Load figure map from EPUB if present
+    epub_path = _find_epub(directory)
+    figure_map: FigureMap = {}
+    if epub_path:
+        figure_map = parse_epub_figures(epub_path)
     ann_path = _find_annotation_file(directory)
     lines = ann_path.read_text(encoding="utf-8").splitlines()
 
@@ -106,4 +119,11 @@ def parse_boox_annotations(
     for i, a in enumerate(annotations, start=1):
         a.number = i
 
-    return annotations
+    # Attach figure references when EPUB figures are available
+    if figure_map:
+        for a in annotations:
+            for label in detect_figure_refs(a.text):
+                if label in figure_map:
+                    a.figures.append(FigureRef(label=label))
+
+    return annotations, figure_map

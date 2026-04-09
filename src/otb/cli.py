@@ -100,11 +100,11 @@ def boox() -> None:
 def boox_parse(input_dir: Path, output_dir: Path) -> None:
     """Parse Boox annotations and write individual markdown files."""
     try:
-        annotations = parse_boox_annotations(input_dir)
+        annotations, figure_data = parse_boox_annotations(input_dir)
     except FileNotFoundError as exc:
         click.echo(str(exc), err=True)
         sys.exit(1)
-    write_annotations(annotations, output_dir)
+    write_annotations(annotations, output_dir, figure_data or None)
     click.echo(len(annotations))
 
 
