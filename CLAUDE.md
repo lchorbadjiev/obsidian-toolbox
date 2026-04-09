@@ -85,6 +85,9 @@ manually run `git add .beads/ && git commit`.
 
 ## Active Technologies
 
+- Python 3.12+ + `pypdfium2` (NEW — PDF rendering) (013-pdf-figure-extract)
+- Filesystem (reads PDF, writes PNG images + markdown) (013-pdf-figure-extract)
+
 - Python 3.12+ + `mcp` (FastMCP) — already installed (012-boox-import-prompt)
 - N/A (prompt returns instructions, no I/O) (012-boox-import-prompt)
 
