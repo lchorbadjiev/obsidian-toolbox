@@ -1,0 +1,34 @@
+
+Title 
+Just for Fun: The Story of an Accidental Revolutionary
+Authors 
+Linus Torvalds & David Diamond
+Ids 
+9780066620732, c3jemx2ube5v5zpg.onion, Google
+Tags 
+Autobiography and memoir, Biography & Autobiography, Business, Business & Economics, General, Harper Collins Publishers, ISBN 978-0-06-662073-2, OCR by rioter11, scanned by undeadekb
+Formats 
+EPUB, PDF
+Folder 
+Book files
+Publisher 
+HarperCollins
+Author sort 
+Torvalds, Linus & Diamond, David
+Title sort 
+Just for Fun: The Story of an Accidental Revolutionary
+Date 
+19 Dec 2025
+uuid 
+2681268a-c802-4561-8478-a7a415dddf70
+Id 
+1570
+Published 
+Jun 2002
+Modified 
+19 Dec 2025
+Size 
+12.37 MB
+Languages 
+English
+

@@ -20,6 +20,7 @@ from otb.anki import export_annotations
 from otb.md_parser import parse_annotation_dir_with_paths, parse_annotation_md
 from otb.md_writer import write_annotations
 from otb.parser import Annotation, Book, parse_notebook
+from otb.boox_parser import parse_boox_annotations
 from otb.zotero_parser import parse_zotero_annotations
 
 mcp = FastMCP(
@@ -332,6 +333,29 @@ def parse_zotero_export(path: str) -> list[dict[str, Any]]:
     if not resolved.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {path}")
     annotations = parse_zotero_annotations(resolved)
+    return [_annotation_to_dict(a) for a in annotations]
+
+
+@mcp.tool(
+    description=(
+        "Parse a Boox annotation export directory and return all annotations "
+        "as a list. The directory must contain book.txt and exactly one other "
+        ".txt annotation file. "
+        "Each annotation has: book_title, author, chapter, page (always empty), "
+        "location (page number as integer), text, title (auto-generated), "
+        "color (always null), number. "
+        "Raises FileNotFoundError if the directory or required files do not exist. "
+        "Raises NotADirectoryError if the path is not a directory."
+    )
+)
+def parse_boox_export(path: str) -> list[dict[str, Any]]:
+    """Return annotations from a Boox export directory."""
+    resolved = Path(path).expanduser().resolve()
+    if not resolved.exists():
+        raise FileNotFoundError(f"Directory not found: {path}")
+    if not resolved.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+    annotations = parse_boox_annotations(resolved)
     return [_annotation_to_dict(a) for a in annotations]
 
 

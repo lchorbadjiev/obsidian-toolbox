@@ -15,6 +15,7 @@ from otb.mcp_server import (
     anki_export,
     generate_book_index,
     kindle_import_annotations,
+    parse_boox_export,
     parse_kindle_export,
     parse_md_annotations_dir,
     parse_zotero_export,
@@ -396,6 +397,40 @@ def test_parse_zotero_export_file_not_directory(tmp_path: Path) -> None:
     f.write_text("x", encoding="utf-8")
     with pytest.raises(NotADirectoryError):
         parse_zotero_export(str(f))
+
+
+# --- parse_boox_export tool ---
+
+BOOX_FIXTURES = Path(__file__).parent / "fixtures" / "boox"
+
+
+def test_parse_boox_export_returns_annotations() -> None:
+    result = parse_boox_export(str(BOOX_FIXTURES))
+    assert len(result) == 35
+
+
+def test_parse_boox_export_annotation_fields() -> None:
+    result = parse_boox_export(str(BOOX_FIXTURES))
+    a = result[0]
+    assert a["book_title"] == "Just for Fun: The Story of an Accidental Revolutionary"
+    assert a["author"] == "Linus Torvalds & David Diamond"
+    assert a["page"] == ""
+    assert a["location"] == 17
+    assert a["color"] is None
+    assert a["number"] == 1
+    assert a["title"]  # non-empty
+
+
+def test_parse_boox_export_missing_directory() -> None:
+    with pytest.raises(FileNotFoundError):
+        parse_boox_export("/tmp/no_such_boox_dir_xyz")
+
+
+def test_parse_boox_export_file_not_directory(tmp_path: Path) -> None:
+    f = tmp_path / "not_a_dir.md"
+    f.write_text("x", encoding="utf-8")
+    with pytest.raises(NotADirectoryError):
+        parse_boox_export(str(f))
 
 
 # --- kindle_import_annotations prompt ---

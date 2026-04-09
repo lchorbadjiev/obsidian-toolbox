@@ -8,18 +8,26 @@ from otb.word_fixer import check_aspell_available, fix_concatenated_words
 
 
 def parse_book_metadata(path: Path) -> Book:
-    """Parse a Zotero book.txt metadata file and return a Book.
+    """Parse a book.txt metadata file and return a Book.
+
+    Handles label/value pair format used by both Zotero and Boox
+    exports. Leading blank lines are stripped so the function works
+    regardless of whether the file starts with content or whitespace.
 
     Raises FileNotFoundError if the file does not exist.
     """
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
-    lines = path.read_text(encoding="utf-8").splitlines()
+    lines = [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     fields: dict[str, str] = {}
     i = 0
     while i < len(lines) - 1:
-        label = lines[i].strip()
-        value = lines[i + 1].strip()
+        label = lines[i]
+        value = lines[i + 1]
         if label:
             fields[label] = value
         i += 2

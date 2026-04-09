@@ -1,0 +1,130 @@
+Reading Notes | <<Just for Fun_ The Story of an Accidental R - Linus Torvalds>>Linus Benedict Torvalds
+Preface: The Meaning of Life I (Sex, War, Linux)
+2026-02-20 22:08  |  Page No.: 17
+L: I’ll give you a few examples so you can kind of get the idea. And the obvious one is sex. It started out as survival, but it became a social thing. That’s why you get married. And then it becomes entertainment.
+-------------------
+2026-02-20 22:13  |  Page No.: 22
+L: Now all this is on a bigger scale. It’s not just about people, it’s about life. It’s like the Law of Entropy. In this Entropy Law of Life, everything moves from survival to entertainment, but that doesn’t mean that on a local scale it can’t go backward, and obviously it essentially does. Things just disintegrate sometimes.
+-------------------
+I
+2026-02-20 22:17  |  Page No.: 27
+Nobody else really seemed to care too much about my nose; this was almost certainly, in retrospect, because they cared about their own problems a whole lot more.
+-------------------
+III
+2026-02-20 22:21  |  Page No.: 33
+Let me tell you about Finland. Sometime in October the skies turn an unpleasant shade of gray, and it always looks as if it will either rain or snow. You wake up every day to this gloominess of anticipation. The rain will be chilly and it will rinse away any evidence of summer. When the snow comes, it has that magical quality of making everything bright and painting the place with a veneer of optimism. The trouble is, the optimism lasts about three days but the snow remains for month after bone-numbingly cold month.
+-------------------
+IV
+2026-02-20 22:32  |  Page No.: 42
+Computers were actually better for kids when they were less sophisticated, when dweebie youngsters like me could tinker under the hood. These days, computers suffer from the same problem as cars: As they became more complex, they became more difficult for people to take apart and put back together, and, as a result, learn what they are all about.
+-------------------
+VI
+2026-02-21 10:52  |  Page No.: 60
+In fact, some people suggest that the major reason for the required army duty is to give Finnish men something to talk about over beer for as long as they live. They all have something miserable in common. They hated the Army, but they’re happy to talk about it afterward.
+-------------------
+I
+2026-02-21 11:06  |  Page No.: 75
+I was always searching for something interesting to do. I had a Forth language interpreter and compiler, just to play around with. Forth was a strange language that nobody uses anymore. It was kind of a fun, niche-market language that was fairly widely used in the 1980s for different things, but it never became very popular, being difficult to follow for non-techie people. Actually it was kind of useless.
+-------------------
+IV
+2026-02-21 18:15  |  Page No.: 112
+Except… and this is where my heart was in my throat when he was growing up: How on Earth was he going to meet any nice girls that way? I could only once more resort to the tried and true parenting measure of keeping my fingers crossed. And lo and behold: It worked! He met Tove while teaching at the university, and when she made him forget both his cat and his computer for several days, it was immediately obvious that Nature had triumphed, as is her wont.
+-------------------
+V: The Beauty of Programming
+2026-02-21 18:17  |  Page No.: 114
+V: The Beauty of Programming
+I don’t know how to really explain my fascination with programming, but I’ll try. To somebody who does it, it’s the most interesting thing in the world. It’s a game much more involved than chess, a game where you can make up your own rules and where the end result is whatever you can make of it.
+And yet, to the outside, it looks like the most boring thing on Earth.
+-------------------
+2026-02-21 18:18  |  Page No.: 114
+I’m personally convinced that computer science has a lot in common with physics. Both are about how the world works at a rather fundamental level. The difference, of course, is that while in physics you’re supposed to figure out how the world is made up, in computer science you create the world. Within the confines of the computer,
+-------------------
+2026-02-21 18:18  |  Page No.: 115
+you’re the creator. You get to ultimately control everything that happens. If you’re good enough, you can be God. On a small scale.
+-------------------
+IX
+2026-02-21 18:48  |  Page No.: 141
+Actually, I didn’t want the money for a variety of reasons. When I originally posted Linux, I felt I was following in the footsteps of centuries of scientists and other academics who built their work on the foundations of others—on the shoulders of giants, in the words of Sir Isaac Newton. Not only was I sharing my work so that others could find it useful, I also wanted feedback (okay, and praise). It didn’t make sense to charge people who could potentially help me improve my work. I suppose I would have approached it all differently if I hadn’t been raised in Finland, where anyone exhibiting the slightest sign of greediness is viewed with suspicion, if not envy. (This has changed a bit since the days when Nokia phones started making their way into pockets the world over, boosting the bank accounts of numerous Finns.) And, yes, I undoubtedly would have approached the whole no-money thing a lot differently if I had not been brought up under the influence of a diehard academic grandfather and a diehard communist father.
+-------------------
+V
+2026-02-22 16:11  |  Page No.: 214
+Do you ever read advocacy newsgroups? The entire purpose of their existence is to advocate something, which means to put something else down. So if you go on them you find nothing but “My system is better than your system” nonsense. It’s its own form of online masturbation.
+-------------------
+2026-02-22 16:16  |  Page No.: 217
+It’s relatively easy to install Linux on a computer. But for most companies, one of the big issues, historically, has been: Who do we blame when something goes wrong?
+-------------------
+IX: Is the Linux Revolution Over? By Scott Berinato, PC Week
+2026-02-23 21:16  |  Page No.: 253
+Anyone reading this column would assume the mounting pressures of my role as chief nerd had turned me into an asshole. But that’s wrong. I always was an asshole.
+-------------------
+2026-02-23 21:19  |  Page No.: 255
+There’s no “official” version of Linux. There’s my version and there’s everybody else’s version. The fact is, most people trust my version and rely on it as the de facto official version because they’ve seen me work for nine years on it. I was the original guy and people generally agree that I’ve been doing a good job. But let’s say I shave my head to display a 666 and say, “Bow before me because if you don’t I will smite thee!” They would just laugh in my face and say, “OK, we’ll just take this little kernel and do what we think is right.”
+-------------------
+X
+2026-02-23 21:22  |  Page No.: 259
+People take me too seriously. They take a lot of things too seriously. And one lesson I’ve learned from my years as Linux’s hood ornament is that there’s something worse: Some folks can’t be content to just take things too seriously on their own. They’re not happy unless they convince others to go along with their obsession. This has become one of my major pet peeves in life.
+-------------------
+2026-02-23 21:23  |  Page No.: 260
+Then there are people with individual ideas, folks who have convictions in certain areas to the degree that they say, “No, I won’t go along.” And these people become leaders. It’s easy to become a leader. (It has to be. I became one, right?) Then, other people who don’t have convictions in those areas are more than happy to let these leaders make their decisions for them and tell them what to do.
+-------------------
+2026-02-23 21:23  |  Page No.: 260
+It’s absolutely the right of any human being to do what they’re told by someone they choose as a leader. I’m not arguing against that, although I find that part depressing. However, what I find to be unacceptable is when people, either leaders or followers, then try to impose their own world views on others. That’s not just depressing—it’s scary. It’s depressing that people will follow just about anyone, including me. And it’s scary that people will then want to impose their followingness—if that’s a word—on others, including me.
+-------------------
+2026-02-23 21:26  |  Page No.: 262
+The GPL is wonderful in its gift of letting anyone play. Just think about what a major advance for humanity that is! But does that mean that every innovation should be GPL’d?
+No way! This is the abortion issue of technology. It should be up to the individual innovator to decide for herself or himself whether to GPL the project or to use a more conventional approach to copyright. The thing that drives me crazy about Richard is that he sees everything in black and white. And that creates unnecessary political divisions. He never understands the viewpoint of anybody else. If he were into religion, you would call him a religious fanatic.
+-------------------
+2026-02-23 21:27  |  Page No.: 263
+I admire Richard from afar for a bunch of reasons. And I guess I tend to respect people, like Richard, who have very strong moral opinions. But why can’t they keep these opinions to themselves? The thing I dislike the most is when people tell me what I should or should not do. I absolutely despise people who think they have any say over my personal decisions. (Except, perhaps, my wife.)
+-------------------
+XII
+2026-02-23 21:34  |  Page No.: 272
+It’s easy to fight windmills if you don’t realize how hard it is.
+Five years ago when people asked me if I thought Linux would be able to take over the desktop and make a dent in Microsoft, they always had a doubtful edge to their voice. I invariably told them that I thought it would. They would look skeptical. The fact is, they probably knew more than I did about the reality.
+-------------------
+Intellectual Property
+2026-02-23 21:38  |  Page No.: 276
+To many people, including me, intellectual property is all about human inventiveness, about the very thing that makes us humans instead of animals (that, and thumbs, of course). And in that setting, the very name “intellectual property” is an affront: It’s not property to be sold like chattel, it’s the act of creation, it’s the greatest thing any human can ever do. It’s Art, with a capital A. It’s the Mona Lisa, but it’s also the end result of a long night of programming, and it’s an end result that you as a programmer are damned proud of. It’s something so precious that selling it isn’t even possible: It’s indelibly a part of who you are.
+-------------------
+2026-02-23 21:39  |  Page No.: 276
+And then, in the other corner, weighing in at an approximate seven gadzillion billion U.S. dollars a year, intellectual property is huge business. Human creativity got a price tag, and it turned out to be quite expensive. Creativity is rare, and as a result it is not just expensive but also extremely lucrative. Which brings in a totally different class of arguments, and totally different kinds of people.
+-------------------
+2026-02-23 21:42  |  Page No.: 279
+What makes the discussion ugly at this point is that a lot of the arguments for stronger intellectual property rights are based on the notion of giving inventors and artists more “protection.” What people don’t seem to ever realize is that giving such powerful rights to some people also ends up taking rights away from others.
+-------------------
+2026-02-23 21:45  |  Page No.: 282
+People used to do this all the time before, and that is actually why patent law was originally introduced. In order to encourage individuals and companies to expose their secrets, patent law allowed for protection in the marketplace for some time if you divulged what your secret to success was. A basic form of tit-for-tat: You tell how you do something, and we’ll give you exclusive rights for X years.
+-------------------
+2026-02-23 21:47  |  Page No.: 282
+These days even trade secrets have legal protection, for unfathomable reasons. Any sane person realizes that once a secret is out, it is no longer a secret. Except in the strange and twisty passages of intellectual property law, where secrets can continue to be secrets even after everybody knows what they are. And where the knowledge you have in your head can get you sued, if you happen to go to work for the wrong employer. Some intellectual property law is downright scary.
+-------------------
+2026-02-23 21:52  |  Page No.: 287
+Such misuses of intellectual property power aren’t limited to technology, by the way. Another classic example is the use of trade secret law to prosecute and persecute the people who tried to inform the public about Scientology. The Church of Scientology successfully claimed that their scriptures (“Advanced Technology”) fell under trade secret protection, and used IP law to defend them from being made public.
+-------------------
+An End to Control
+2026-02-24 21:30  |  Page No.: 294
+Sun tried to get Java standardized through two different standardization bodies, and each time they basically pulled out because of the control issues. On the one hand, Sun wanted to standardize the language. But at the same time they didn’t want to lose control. So the standardization boards basically said, “Hey, this is not just about you.” And as a result, Sun just flaked out. It’s an example of a company trying to control technology in ways that make no sense for the people who actually use the technology. And it’s always going to fail for the company. It also makes the technology itself fail—or take longer to be accepted.
+-------------------
+THE AMUSEMENT RIDE AHEAD
+2026-02-24 21:36  |  Page No.: 299
+It also makes me personally convinced that if we’re still talking in a big way about operating systems fifteen years from now, something is seriously wrong somewhere. This may sound strange coming from somebody whose main claim to fame is writing his own operating system, but the fact is that, statistically speaking, nobody wants an operating system.
+In fact, nobody even wants a computer. What everybody wants is this magical toy that can be used to browse the Web, write term papers, play games, balance the checkbook, and so on.
+-------------------
+2026-02-24 21:38  |  Page No.: 301
+And where is Linux itself, and open source generally, in all this? You won’t even know. It will be inside those Sony machines. You’ll never see it, you’ll never know it, but it’s there, making it all run. It will be in that cell phone, which is at the same time acting as your very own personal communications hub for the rest of your electronic widgets when you’re away from your wireless local area network.
+-------------------
+WHY OPEN SOURCE MAKES SENSE
+2026-02-24 21:52  |  Page No.: 313
+This is why I have tried so hard over the years to avoid getting involved with Linux companies. This is becoming increasingly critical now that the money is materializing. With so many dollars floating around, people start questioning your motivations. For me, it’s helpful that I’ve been known as being neutral. You have no idea how important it is to me to maintain that neutrality. It drives me nuts.
+-------------------
+THE MEANING OF LIFE II
+2026-02-24 22:04  |  Page No.: 324
+So there I sit, wondering what I should talk about regarding communications. Oh, I forgot to mention that most of the rest of the panel would be comprised of philosophers talking about technology. This is Berkeley, after all. The two things they take very seriously in Berkeley are Berkeley politics and Berkeley philosophers.
+-------------------
+2026-02-24 22:05  |  Page No.: 326
+And I, as a technologist, know that technology drives nothing. It is society that changes technology, not the other way around. Technology just sets the boundaries for what we can do, and how cheaply we can do it.
+Technology, like the devices it creates, is at least so far inherently stupid. It’s only interesting insofar as what you can do with it, and the driving force behind it is thus really human needs and interests. We don’t communicate more these days because we have the means to do so—we communicate more these days because people are blabbermouths, and they want to communicate; and if the means aren’t there, they will be created. Thus Nokia.
+-------------------
+2026-02-24 22:08  |  Page No.: 328
+Survive. Socialize. Have fun. That’s the progression. And that’s also why we chose “Just for Fun” as the title of this book.
+-------------------
