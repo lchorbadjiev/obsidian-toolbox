@@ -14,3 +14,4 @@ wheels/
 *.db
 .beads-credential-key
 /tmp
+.DS_Store
