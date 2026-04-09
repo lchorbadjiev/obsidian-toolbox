@@ -41,7 +41,8 @@ def test_empty_annotations(tmp_path: Path) -> None:
     )
     ann_md = tmp_path / "Annotations.md"
     ann_md.write_text("# Annotations\n(date)\n", encoding="utf-8")
-    assert not parse_zotero_annotations(tmp_path)
+    result, _ = parse_zotero_annotations(tmp_path)
+    assert not result
 
 
 # ---------------------------------------------------------------------------
@@ -51,7 +52,8 @@ def test_empty_annotations(tmp_path: Path) -> None:
 
 @pytest.fixture
 def annotations() -> list[Annotation]:
-    return parse_zotero_annotations(FIXTURE_DIR)
+    result, _ = parse_zotero_annotations(FIXTURE_DIR)
+    return result
 
 
 def test_annotation_count(annotations: list[Annotation]) -> None:
@@ -119,7 +121,7 @@ def _make_zotero_dir(tmp_path: Path, annotation_lines: str) -> Path:
 
 def test_single_word_annotation(tmp_path: Path) -> None:
     d = _make_zotero_dir(tmp_path, "\u201cIf\u201d (\u201cBook\u201d, p. 4)")
-    result = parse_zotero_annotations(d)
+    result, _ = parse_zotero_annotations(d)
     assert len(result) == 1
     assert result[0].text == "If"
     assert result[0].title  # non-empty title
@@ -134,7 +136,7 @@ def test_short_fragment_annotation(tmp_path: Path) -> None:
     d = _make_zotero_dir(
         tmp_path, "\u201cyour design\u201d (\u201cBook\u201d, p. 12)"
     )
-    result = parse_zotero_annotations(d)
+    result, _ = parse_zotero_annotations(d)
     assert len(result) == 1
     assert result[0].text == "your design"
     assert result[0].page == "12"
@@ -152,7 +154,7 @@ def test_unparseable_line_skipped(tmp_path: Path) -> None:
         "\u201cMore text\u201d (\u201cBook\u201d, p. 2)"
     )
     d = _make_zotero_dir(tmp_path, lines)
-    result = parse_zotero_annotations(d)
+    result, _ = parse_zotero_annotations(d)
     assert len(result) == 2
     assert result[0].text == "Good text"
     assert result[1].text == "More text"

@@ -120,9 +120,9 @@ def zotero() -> None:
 def zotero_parse(input_dir: Path, output_dir: Path, verbose: bool) -> None:
     """Parse Zotero annotations and write individual markdown files."""
     try:
-        annotations = parse_zotero_annotations(input_dir, verbose=verbose)
+        annotations, figure_data = parse_zotero_annotations(input_dir, verbose=verbose)
     except (FileNotFoundError, RuntimeError) as exc:
         click.echo(str(exc), err=True)
         sys.exit(1)
-    write_annotations(annotations, output_dir)
+    write_annotations(annotations, output_dir, figure_data or None)
     click.echo(len(annotations))

@@ -347,23 +347,51 @@ def anki_export(
 
 @mcp.tool(
     description=(
-        "Parse a Zotero annotation export directory and return all annotations "
-        "as a list. The directory must contain Annotations.md and book.txt. "
-        "Each annotation has: book_title, author, chapter, page, location, text, "
-        "title (auto-generated), color (always null), number. "
+        "Parse a Zotero annotation export directory, write annotations to a temp "
+        "JSON file, and return a summary. If a PDF is present, figure images "
+        "are extracted to a temp directory. The summary contains: file_path "
+        "(path to temp JSON file), count, book_title, author, and "
+        "figures_dir (path to temp dir with extracted figure images, or null). "
         "Raises FileNotFoundError if the directory or required files do not exist. "
         "Raises NotADirectoryError if the path is not a directory."
     )
 )
-def parse_zotero_export(path: str) -> list[dict[str, Any]]:
-    """Return annotations from a Zotero export directory."""
+def parse_zotero_export(path: str) -> dict[str, Any]:  # pylint: disable=too-many-locals  # temp file + figure extraction pipeline
+    """Write annotations to temp JSON file; return summary with file path."""
     resolved = Path(path).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"Directory not found: {path}")
     if not resolved.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {path}")
-    annotations = parse_zotero_annotations(resolved)
-    return [_annotation_to_dict(a) for a in annotations]
+    annotations, figure_map = parse_zotero_annotations(resolved)
+    dicts = [_annotation_to_dict(a) for a in annotations]
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as tmp:
+        json.dump(dicts, tmp, ensure_ascii=False)
+        tmp_path = tmp.name
+
+    figures_dir: str | None = None
+    if figure_map:
+        fig_tmp = tempfile.mkdtemp(prefix="otb_figures_")
+        img_dir = Path(fig_tmp) / "images"
+        img_dir.mkdir()
+        for label, (img_bytes, ext) in figure_map.items():
+            normalized = f"figure-{label.replace('.', '-')}{ext}"
+            (img_dir / normalized).write_bytes(img_bytes)
+        figures_dir = fig_tmp
+
+    book_title = annotations[0].book.title if annotations else ""
+    author = annotations[0].book.author if annotations else ""
+
+    return {
+        "file_path": tmp_path,
+        "count": len(dicts),
+        "book_title": book_title,
+        "author": author,
+        "figures_dir": figures_dir,
+    }
 
 
 @mcp.tool(

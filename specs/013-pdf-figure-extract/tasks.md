@@ -16,9 +16,9 @@ implementation and testing.
 
 **Purpose**: Add dependency and create test fixtures
 
-- [ ] T001 Add `pypdf` dependency to `pyproject.toml` and run
+- [x] T001 Add `pypdf` dependency to `pyproject.toml` and run
   `uv sync` to install it
-- [ ] T002 Create a minimal test PDF fixture at
+- [x] T002 Create a minimal test PDF fixture at
   `tests/fixtures/zotero/test.pdf` containing one page with
   an embedded JPEG image and the text "Figure 1-1" on it
   (use pypdf or reportlab to generate programmatically)
@@ -37,57 +37,57 @@ depend on
 > **NOTE: Write these tests FIRST, ensure they FAIL before
 > implementation (Constitution III)**
 
-- [ ] T003 [P] Write test `test_extract_page_image` in
+- [x] T003 [P] Write test `test_extract_page_image` in
   `tests/test_pdf_figures.py` verifying that
   `extract_page_image(pdf_path, page_num)` returns
   `(image_bytes, extension)` tuple for the test PDF fixture
-- [ ] T004 [P] Write test `test_extract_page_image_no_images`
+- [x] T004 [P] Write test `test_extract_page_image_no_images`
   in `tests/test_pdf_figures.py` verifying that a page with
   no images returns `None`
-- [ ] T005 [P] Write test `test_extract_page_image_missing_pdf`
+- [x] T005 [P] Write test `test_extract_page_image_missing_pdf`
   in `tests/test_pdf_figures.py` verifying that a nonexistent
   PDF returns `None` (graceful failure)
-- [ ] T006 [P] Write test `test_detect_zotero_figure_refs`
+- [x] T006 [P] Write test `test_detect_zotero_figure_refs`
   in `tests/test_pdf_figures.py` verifying detection of
   caption pattern `"Figure 5-2. Monolithic architectures"`
   returns `[("5-2", "107")]`
-- [ ] T007 [P] Write test
+- [x] T007 [P] Write test
   `test_detect_zotero_figure_refs_inline` in
   `tests/test_pdf_figures.py` verifying detection of inline
   pattern `"as illustrated in Figure 2-1"` with page "26"
   returns `[("2-1", "26")]`
-- [ ] T008 [P] Write test
+- [x] T008 [P] Write test
   `test_detect_zotero_figure_refs_request` in
   `tests/test_pdf_figures.py` verifying detection of
   `"Get the figure 5-17"` pattern
-- [ ] T009 [P] Write test
+- [x] T009 [P] Write test
   `test_detect_zotero_figure_refs_none` in
   `tests/test_pdf_figures.py` verifying that text with no
   figure references returns `[]`
 
 ### Implementation for Foundational Phase
 
-- [ ] T010 Create `src/otb/pdf_figures.py` with:
+- [x] T010 Create `src/otb/pdf_figures.py` with:
   `extract_page_image(pdf_path: Path, page_num: int)
   -> tuple[bytes, str] | None` that opens PDF with pypdf,
   accesses the page's images via `page.images`, returns the
   largest image's data and file extension. Returns `None` on
   errors or if no images found. Warns to stderr on failures.
-- [ ] T011 Add `detect_zotero_figure_refs(text: str,
+- [x] T011 Add `detect_zotero_figure_refs(text: str,
   page: str) -> list[tuple[str, str]]` to
   `src/otb/pdf_figures.py` using regex to detect:
   caption `^Figure\s+(\d+[-.]?\d+)`, inline
   `Figure\s+(\d+[-.]?\d+)`, and request
   `[Gg]et the figure\s+(\d+[-.]?\d+)`. Returns list of
   (label, page_str) tuples.
-- [ ] T012 Add `extract_pdf_figures(pdf_path: Path,
+- [x] T012 Add `extract_pdf_figures(pdf_path: Path,
   refs: list[tuple[str, str]]) -> FigureMap` to
   `src/otb/pdf_figures.py` that iterates over figure refs,
   calls `extract_page_image` for each page, returns a
   FigureMap (label → (bytes, ext)).
-- [ ] T013 Run `uv run pytest tests/test_pdf_figures.py`
+- [x] T013 Run `uv run pytest tests/test_pdf_figures.py`
   and verify all tests pass (green)
-- [ ] T014 Run `uv run mypy src/otb/pdf_figures.py` and
+- [x] T014 Run `uv run mypy src/otb/pdf_figures.py` and
   `uv run pylint src/otb/pdf_figures.py` — fix any issues
 
 **Checkpoint**: PDF extraction module working independently
@@ -104,14 +104,14 @@ verify caption annotations get FigureRef objects and images.
 
 ### Tests for User Story 1
 
-- [ ] T015 [P] [US1] Write test
+- [x] T015 [P] [US1] Write test
   `test_zotero_parse_with_pdf_caption` in
   `tests/test_pdf_figures.py` that creates a temp dir with
   `book.txt`, `Annotations.md` containing a "Figure 1-1."
   caption annotation with page reference, and the test PDF,
   then calls `parse_zotero_annotations` and verifies the
   annotation has a `figures` list with one FigureRef
-- [ ] T016 [P] [US1] Write test
+- [x] T016 [P] [US1] Write test
   `test_zotero_cli_with_pdf_writes_images` in
   `tests/test_pdf_figures.py` that runs `otb zotero parse`
   on a temp dir with PDF and verifies `images/` directory
@@ -120,7 +120,7 @@ verify caption annotations get FigureRef objects and images.
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Modify `parse_zotero_annotations` in
+- [x] T017 [US1] Modify `parse_zotero_annotations` in
   `src/otb/zotero_parser.py` to: detect `.pdf` file in
   directory, call `detect_zotero_figure_refs` on each
   annotation's text (passing the page string), call
@@ -128,17 +128,17 @@ verify caption annotations get FigureRef objects and images.
   `FigureRef` objects to annotations. Return
   `(annotations, figure_map)` tuple (same pattern as
   boox_parser).
-- [ ] T018 [US1] Update `zotero_parse` CLI command in
+- [x] T018 [US1] Update `zotero_parse` CLI command in
   `src/otb/cli.py` to handle the new tuple return from
   `parse_zotero_annotations` and pass figure_data to
   `write_annotations`
-- [ ] T019 [US1] Update `parse_zotero_export` MCP tool in
+- [x] T019 [US1] Update `parse_zotero_export` MCP tool in
   `src/otb/mcp_server.py` to write figures to a temp dir
   and return `figures_dir` in the summary (same pattern
   as `parse_boox_export`)
-- [ ] T020 [US1] Run `uv run pytest` and verify all tests
+- [x] T020 [US1] Run `uv run pytest` and verify all tests
   pass
-- [ ] T021 [US1] Run `uv run mypy src/ tests/` and
+- [x] T021 [US1] Run `uv run mypy src/ tests/` and
   `uv run pylint src/ tests/` — fix any issues
 
 **Checkpoint**: Caption-based PDF figure extraction working
@@ -153,7 +153,7 @@ referenced figure extracted and linked.
 
 ### Tests for User Story 2
 
-- [ ] T022 [P] [US2] Write test
+- [x] T022 [P] [US2] Write test
   `test_zotero_parse_inline_figure_ref` in
   `tests/test_pdf_figures.py` for an annotation containing
   "illustrated in Figure 1-1" inline, verifying FigureRef
@@ -161,7 +161,7 @@ referenced figure extracted and linked.
 
 ### Implementation for User Story 2
 
-- [ ] T023 [US2] Verify `detect_zotero_figure_refs` already
+- [x] T023 [US2] Verify `detect_zotero_figure_refs` already
   handles inline patterns (implemented in T011). The
   integration from T017 should already detect inline refs.
   Run tests to confirm.
@@ -174,7 +174,7 @@ referenced figure extracted and linked.
 
 ### Tests for User Story 3
 
-- [ ] T024 [US3] Write test
+- [x] T024 [US3] Write test
   `test_zotero_parse_no_pdf_unchanged` in
   `tests/test_pdf_figures.py` verifying that
   `parse_zotero_annotations` on the existing
@@ -183,7 +183,7 @@ referenced figure extracted and linked.
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Verify existing Zotero parser tests still
+- [x] T025 [US3] Verify existing Zotero parser tests still
   pass unchanged. Run
   `uv run pytest tests/test_zotero_parser.py`
 
@@ -195,14 +195,14 @@ referenced figure extracted and linked.
 
 **Purpose**: Final validation and cleanup
 
-- [ ] T026 Run `pymarkdownlnt scan -r --respect-gitignore .`
+- [x] T026 Run `pymarkdownlnt scan -r --respect-gitignore .`
   — fix any markdown lint issues
-- [ ] T027 Run full quality gate suite:
+- [x] T027 Run full quality gate suite:
   `uv run pytest && uv run mypy src/ tests/ && uv run pylint src/ tests/`
-- [ ] T028 Verify with real sample data:
+- [x] T028 Verify with real sample data:
   `uv run otb zotero parse tmp/building-evolutionary-architectures/ /tmp/pdf-fig-test/`
   and check `images/` directory contains extracted figures
-- [ ] T029 Verify backward compat with existing fixture:
+- [x] T029 Verify backward compat with existing fixture:
   `uv run otb zotero parse tests/fixtures/zotero/ /tmp/zotero-nopdf-test/`
 
 ---

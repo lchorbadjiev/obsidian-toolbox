@@ -371,16 +371,20 @@ def test_anki_export_tool_anki_unreachable_raises() -> None:
 ZOTERO_FIXTURES = Path(__file__).parent / "fixtures" / "zotero"
 
 
-def test_parse_zotero_export_returns_annotations() -> None:
+def test_parse_zotero_export_returns_summary() -> None:
     result = parse_zotero_export(str(ZOTERO_FIXTURES))
-    assert len(result) == 306
+    assert result["count"] == 306
+    assert result["file_path"]
+    assert result["book_title"] == "Refactoring: Improving the Design of Existing Code"
+    assert result["author"] == "Martin Fowler"
 
 
 def test_parse_zotero_export_annotation_fields() -> None:
     result = parse_zotero_export(str(ZOTERO_FIXTURES))
-    a = result[0]
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = json.load(f)
+    a = annotations[0]
     assert a["book_title"] == "Refactoring: Improving the Design of Existing Code"
-    assert a["author"] == "Martin Fowler"
     assert a["page"] == "xi"
     assert a["location"] == 0
     assert a["color"] is None

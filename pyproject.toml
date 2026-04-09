@@ -8,6 +8,8 @@ dependencies = [
     "beautifulsoup4>=4.14.3",
     "click>=8.3.1",
     "mcp>=1.0.0",
+    "pillow>=12.2.0",
+    "pypdf>=6.9.2",
 ]
 
 [project.scripts]

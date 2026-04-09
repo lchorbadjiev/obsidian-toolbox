@@ -3,7 +3,9 @@ import re
 import sys
 from pathlib import Path
 
-from otb.parser import Annotation, Book, _title_from_text
+from otb.epub_figures import FigureMap
+from otb.parser import Annotation, Book, FigureRef, _title_from_text
+from otb.pdf_figures import detect_zotero_figure_refs, extract_pdf_figures
 from otb.word_fixer import check_aspell_available, fix_concatenated_words
 
 
@@ -42,13 +44,20 @@ _ANNOTATION_RE = re.compile(
 )
 
 
-def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-build pipeline
+def _find_pdf(directory: Path) -> Path | None:
+    """Find a single .pdf file in directory, or None."""
+    candidates = list(directory.glob("*.pdf"))
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-build pipeline with PDF figure integration
     directory: Path, verbose: bool = False,
-) -> list[Annotation]:
+) -> tuple[list[Annotation], FigureMap]:
     """Parse Zotero annotation exports from a directory.
 
     The directory must contain book.txt and Annotations.md.
-    Returns a list of Annotation objects with sequential numbering.
+    Optionally extracts figures from a PDF if present.
+    Returns a tuple of (annotations, figure_map).
 
     Raises FileNotFoundError if book.txt or Annotations.md is missing.
     Raises RuntimeError if aspell is not installed.
@@ -104,4 +113,17 @@ def parse_zotero_annotations(  # pylint: disable=too-many-locals  # extract-fix-
     for i, a in enumerate(annotations, start=1):
         a.number = i
 
-    return annotations
+    # Extract figures from PDF if present
+    pdf_path = _find_pdf(directory)
+    figure_map: FigureMap = {}
+    if pdf_path:
+        all_refs: list[tuple[str, str]] = []
+        for a in annotations:
+            refs = detect_zotero_figure_refs(a.text, a.page)
+            for label, page_str in refs:
+                a.figures.append(FigureRef(label=label))
+                all_refs.append((label, page_str))
+        if all_refs:
+            figure_map = extract_pdf_figures(pdf_path, all_refs)
+
+    return annotations, figure_map
