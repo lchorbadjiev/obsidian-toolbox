@@ -85,6 +85,9 @@ manually run `git add .beads/ && git commit`.
 
 ## Active Technologies
 
+- Python 3.12+ + `mcp` (FastMCP) — already installed (012-boox-import-prompt)
+- N/A (prompt returns instructions, no I/O) (012-boox-import-prompt)
+
 - Python 3.12+ + `beautifulsoup4` (already installed) (011-epub-figure-extract)
 - Filesystem (reads EPUB ZIP, writes images + markdown) (011-epub-figure-extract)
 

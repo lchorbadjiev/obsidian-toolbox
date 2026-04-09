@@ -416,6 +416,64 @@ def kindle_import_annotations(
     return [UserMessage(content=text)]
 
 
+@mcp.prompt(
+    description=(
+        "Import Boox annotations from an export directory. "
+        "Orchestrates: parse annotations (with figure extraction if EPUB "
+        "is present), generate titles in batches of ~30 using subagents, "
+        "and save as markdown files. "
+        "Returns step-by-step instructions for the MCP client to execute."
+    )
+)
+def boox_import_annotations(
+    directory_path: str,
+) -> list[UserMessage]:
+    """Return instructions to import Boox annotations."""
+    resolved = str(Path(directory_path).expanduser().resolve())
+    output_dir = str(Path(resolved) / "notes")
+    text = (
+        "Import Boox annotations using this workflow:\n"
+        "\n"
+        f"**Input directory**: `{resolved}`\n"
+        f"**Output directory**: `{output_dir}/`\n"
+        "\n"
+        "## Step 1: Parse the Boox export\n"
+        "\n"
+        f'Call `parse_boox_export(path="{resolved}")`.\n'
+        "This returns a list of annotation dicts, each containing: "
+        "`book_title`, `author`, `chapter`, `page`, `location`, `text`, "
+        "`title` (auto-generated), `number`, and `figures` (list of "
+        "extracted figure references if an EPUB is present in the "
+        "directory).\n"
+        "\n"
+        "## Step 2: Generate titles\n"
+        "\n"
+        "Process the returned annotations in batches of ~30. For each "
+        "batch, use a lightweight model (e.g. Haiku) as a subagent to "
+        "generate a concise title (under 10 words) from each "
+        "annotation's `text` field. Replace the auto-generated `title` "
+        "with the model-generated one.\n"
+        "\n"
+        "If title generation fails for any annotation, keep its "
+        "existing auto-generated title.\n"
+        "\n"
+        "## Step 3: Save annotations\n"
+        "\n"
+        "Call `save_annotations(annotations=<the updated list>, "
+        f'directory="{output_dir}")`.\n'
+        "This writes one markdown file per annotation. If any "
+        "annotations have figure references and the EPUB was present, "
+        "the corresponding figure images will have been extracted "
+        "during Step 1.\n"
+        "\n"
+        "## Expected result\n"
+        "\n"
+        "Report the number of files written and the output "
+        "directory path."
+    )
+    return [UserMessage(content=text)]
+
+
 def run() -> None:
     """Start the MCP server using stdio transport."""
     mcp.run(transport="stdio")

@@ -13,6 +13,7 @@ import pytest
 from otb.anki import AnkiConnectError, ExportResult
 from otb.mcp_server import (
     anki_export,
+    boox_import_annotations,
     generate_book_index,
     kindle_import_annotations,
     parse_boox_export,
@@ -485,3 +486,49 @@ def test_kindle_import_contains_batch_guidance() -> None:
     )
     text = result[0].content.text
     assert "30" in text
+
+
+# --- boox_import_annotations prompt ---
+
+
+def test_boox_import_returns_messages() -> None:
+    result = boox_import_annotations(
+        directory_path="/tmp/exports/boox-book"
+    )
+    assert len(result) >= 1
+    assert result[0].role == "user"
+
+
+def test_boox_import_contains_tool_names() -> None:
+    result = boox_import_annotations(
+        directory_path="/tmp/exports/boox-book"
+    )
+    text = result[0].content.text
+    assert "parse_boox_export" in text
+    assert "save_annotations" in text
+    assert "/tmp/exports/boox-book" in text
+
+
+def test_boox_import_derives_notes_directory() -> None:
+    result = boox_import_annotations(
+        directory_path="/tmp/exports/boox-book"
+    )
+    text = result[0].content.text
+    assert "/tmp/exports/boox-book/notes/" in text
+
+
+def test_boox_import_contains_title_instructions() -> None:
+    result = boox_import_annotations(
+        directory_path="/tmp/exports/boox-book"
+    )
+    text = result[0].content.text
+    assert "title" in text.lower()
+    assert "30" in text
+
+
+def test_boox_import_mentions_figures() -> None:
+    result = boox_import_annotations(
+        directory_path="/tmp/exports/boox-book"
+    )
+    text = result[0].content.text
+    assert "figure" in text.lower() or "EPUB" in text
