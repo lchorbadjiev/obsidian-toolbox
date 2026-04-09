@@ -148,7 +148,11 @@ def parse_md_annotations_dir(
         "Provide EITHER file_path (path to a JSON file of annotation dicts) OR "
         "annotations (inline list of annotation dicts) — not both. "
         "Each annotation dict must have: book_title, author, chapter, page, location, "
-        "text, number. Optional fields: title (str), color (str or null). "
+        "text, number. Optional fields: title (str), color (str or null), "
+        "figures (list of {label, image_path} dicts). "
+        "If figure_images_dir is provided (path from parse_boox_export), figure "
+        "images are copied to the output directory's images/ subdirectory and "
+        "linked in the annotation markdown. "
         "Returns the list of file paths written. "
         "Raises ValueError if both or neither of file_path/annotations are provided. "
         "Raises FileNotFoundError if file_path does not exist."
@@ -158,6 +162,7 @@ def save_annotations(
     directory: str,
     annotations: list[dict[str, Any]] | None = None,
     file_path: str | None = None,
+    figure_images_dir: str | None = None,
 ) -> list[str]:
     """Write annotations to markdown files from inline list or JSON file."""
     if annotations is not None and file_path is not None:
@@ -179,6 +184,19 @@ def save_annotations(
     assert annotations is not None  # for type narrowing
     target = Path(directory).expanduser().resolve()
     objects = [_dict_to_annotation(d) for d in annotations]
+
+    # Copy figure images if a temp figures directory was provided
+    if figure_images_dir:
+        src_images = Path(figure_images_dir) / "images"
+        if src_images.is_dir():
+            dst_images = target / "images"
+            dst_images.mkdir(parents=True, exist_ok=True)
+            for img_file in src_images.iterdir():
+                if img_file.is_file():
+                    (dst_images / img_file.name).write_bytes(
+                        img_file.read_bytes()
+                    )
+
     paths = write_annotations(objects, target)
     return [str(p) for p in paths]
 
@@ -342,25 +360,64 @@ def parse_zotero_export(path: str) -> list[dict[str, Any]]:
 
 @mcp.tool(
     description=(
-        "Parse a Boox annotation export directory and return all annotations "
-        "as a list. The directory must contain book.txt and exactly one other "
-        ".txt annotation file. "
-        "Each annotation has: book_title, author, chapter, page (always empty), "
-        "location (page number as integer), text, title (auto-generated), "
-        "color (always null), number. "
+        "Parse a Boox annotation export directory, write annotations to a temp "
+        "JSON file, and return a summary. If an EPUB is present, figure images "
+        "are extracted to a temp directory. The summary contains: file_path "
+        "(path to temp JSON file), count, book_title, author, chapters, and "
+        "figures_dir (path to temp dir with extracted figure images, or null). "
+        "Annotation titles are auto-generated — improve them by reading the "
+        "temp file, then pass file_path to save_annotations. "
+        "If figures_dir is not null, pass it as figure_images_dir to "
+        "save_annotations to copy figure images to the output. "
         "Raises FileNotFoundError if the directory or required files do not exist. "
         "Raises NotADirectoryError if the path is not a directory."
     )
 )
-def parse_boox_export(path: str) -> list[dict[str, Any]]:
-    """Return annotations from a Boox export directory."""
+def parse_boox_export(path: str) -> dict[str, Any]:  # pylint: disable=too-many-locals  # temp file + figure extraction pipeline
+    """Write annotations to temp JSON file; return summary with file path."""
     resolved = Path(path).expanduser().resolve()
     if not resolved.exists():
         raise FileNotFoundError(f"Directory not found: {path}")
     if not resolved.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {path}")
-    annotations, _figure_map = parse_boox_annotations(resolved)
-    return [_annotation_to_dict(a) for a in annotations]
+    annotations, figure_map = parse_boox_annotations(resolved)
+    dicts = [_annotation_to_dict(a) for a in annotations]
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as tmp:
+        json.dump(dicts, tmp, ensure_ascii=False)
+        tmp_path = tmp.name
+
+    # Write figure images to temp directory if any were extracted
+    figures_dir: str | None = None
+    if figure_map:
+        fig_tmp = tempfile.mkdtemp(prefix="otb_figures_")
+        img_dir = Path(fig_tmp) / "images"
+        img_dir.mkdir()
+        for label, (img_bytes, ext) in figure_map.items():
+            normalized = f"figure-{label.replace('.', '-')}{ext}"
+            (img_dir / normalized).write_bytes(img_bytes)
+        figures_dir = fig_tmp
+
+    chapters: list[str] = []
+    seen: set[str] = set()
+    for a in annotations:
+        if a.chapter and a.chapter not in seen:
+            chapters.append(a.chapter)
+            seen.add(a.chapter)
+
+    book_title = annotations[0].book.title if annotations else ""
+    author = annotations[0].book.author if annotations else ""
+
+    return {
+        "file_path": tmp_path,
+        "count": len(dicts),
+        "book_title": book_title,
+        "author": author,
+        "chapters": chapters,
+        "figures_dir": figures_dir,
+    }
 
 
 @mcp.prompt(
@@ -440,31 +497,33 @@ def boox_import_annotations(
         "## Step 1: Parse the Boox export\n"
         "\n"
         f'Call `parse_boox_export(path="{resolved}")`.\n'
-        "This returns a list of annotation dicts, each containing: "
-        "`book_title`, `author`, `chapter`, `page`, `location`, `text`, "
-        "`title` (auto-generated), `number`, and `figures` (list of "
-        "extracted figure references if an EPUB is present in the "
-        "directory).\n"
+        "This returns a summary dict with: `file_path` (path to a "
+        "temp JSON file containing all annotations), `count`, "
+        "`book_title`, `author`, `chapters`, and `figures_dir` "
+        "(path to a temp directory with extracted figure images, "
+        "or null if no EPUB was present).\n"
         "\n"
         "## Step 2: Generate titles\n"
         "\n"
-        "Process the returned annotations in batches of ~30. For each "
-        "batch, use a lightweight model (e.g. Haiku) as a subagent to "
-        "generate a concise title (under 10 words) from each "
-        "annotation's `text` field. Replace the auto-generated `title` "
-        "with the model-generated one.\n"
+        "Read the temp JSON file at the returned `file_path` in "
+        "batches of ~30 annotations. For each batch, use a "
+        "lightweight model (e.g. Haiku) as a subagent to generate "
+        "a concise title (under 10 words) from each annotation's "
+        "`text` field. Write the updated annotations (with titles) "
+        "back to the same temp file.\n"
         "\n"
         "If title generation fails for any annotation, keep its "
         "existing auto-generated title.\n"
         "\n"
         "## Step 3: Save annotations\n"
         "\n"
-        "Call `save_annotations(annotations=<the updated list>, "
-        f'directory="{output_dir}")`.\n'
-        "This writes one markdown file per annotation. If any "
-        "annotations have figure references and the EPUB was present, "
-        "the corresponding figure images will have been extracted "
-        "during Step 1.\n"
+        "Call `save_annotations(file_path=<the temp file path>, "
+        f'directory="{output_dir}"'
+        ", figure_images_dir=<figures_dir from Step 1>)`.\n"
+        "This reads the temp file and writes one markdown file "
+        "per annotation. If `figures_dir` is not null, figure "
+        "images are copied to the output directory and linked "
+        "in the annotation markdown.\n"
         "\n"
         "## Expected result\n"
         "\n"

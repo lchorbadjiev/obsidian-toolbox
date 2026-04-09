@@ -405,16 +405,20 @@ def test_parse_zotero_export_file_not_directory(tmp_path: Path) -> None:
 BOOX_FIXTURES = Path(__file__).parent / "fixtures" / "boox"
 
 
-def test_parse_boox_export_returns_annotations() -> None:
+def test_parse_boox_export_returns_summary() -> None:
     result = parse_boox_export(str(BOOX_FIXTURES))
-    assert len(result) == 35
+    assert result["count"] == 35
+    assert result["file_path"]
+    assert result["book_title"] == "Just for Fun: The Story of an Accidental Revolutionary"
+    assert result["author"] == "Linus Torvalds & David Diamond"
 
 
-def test_parse_boox_export_annotation_fields() -> None:
+def test_parse_boox_export_temp_file_annotations() -> None:
     result = parse_boox_export(str(BOOX_FIXTURES))
-    a = result[0]
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = json.load(f)
+    a = annotations[0]
     assert a["book_title"] == "Just for Fun: The Story of an Accidental Revolutionary"
-    assert a["author"] == "Linus Torvalds & David Diamond"
     assert a["page"] == ""
     assert a["location"] == 17
     assert a["color"] is None

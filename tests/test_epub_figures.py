@@ -239,7 +239,13 @@ def test_parse_boox_export_figures(tmp_path: Path) -> None:
     )
     shutil.copy(TEST_EPUB, tmp_path / "test.epub")
 
+    import json as _json
+
     result = parse_boox_export(str(tmp_path))
-    assert len(result) == 1
-    assert len(result[0]["figures"]) == 1
-    assert result[0]["figures"][0]["label"] == "1.1"
+    assert result["count"] == 1
+    assert result["figures_dir"] is not None
+    # Verify annotations in temp file have figures
+    with open(result["file_path"], encoding="utf-8") as f:
+        annotations = _json.load(f)
+    assert len(annotations[0]["figures"]) == 1
+    assert annotations[0]["figures"][0]["label"] == "1.1"
